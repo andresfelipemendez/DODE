@@ -2,7 +2,6 @@
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
-//#include <D3DX11async.h>
 #include <directxmath.h>
 
 struct MatrixBufferType
@@ -12,34 +11,27 @@ struct MatrixBufferType
 	float projection[4][4];
 };
 
-ID3D11Device* Renderer::d3ddev = nullptr;
-ID3D11DeviceContext* Renderer::d3dctx= nullptr;
-IDXGISwapChain* Renderer::sc= nullptr;
-ID3D11Texture2D* Renderer::d3dbb= nullptr;
-ID3D11RenderTargetView* Renderer::view= nullptr;
-ID3D11InputLayout* Renderer::m_layout= nullptr;
-ID3D11VertexShader* Renderer::pVS= nullptr;
-ID3D11PixelShader* Renderer::pPS= nullptr;
-ID3D11ShaderResourceView* Renderer::m_texture= nullptr;
-ID3D11SamplerState* Renderer::m_sampleState= nullptr;
-ID3D11Buffer* Renderer::g_pIndexBuffer= nullptr;
-ID3D11Buffer* Renderer::g_pVertexBuffe= nullptr;
-ID3D11Buffer* Renderer::m_matrixBuffer= nullptr;
-D3D11_MAPPED_SUBRESOURCE Renderer::mappedResource;
-MatrixBufferType* Renderer::dataPtr= nullptr;
-
 void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 {
+	HRESULT hr;
+
 	IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
 	IDXGIOutput* output;
 	DXGI_OUTPUT_DESC od;
 
-	CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
+	hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
 	factory->EnumAdapters(0, &adapter);
 	adapter->EnumOutputs(0, &output);
 	output->GetDesc(&od);
 	output->Release();
+
+	if (FAILED(hr)) {
+		if (hr == E_INVALIDARG) {
+			int i = 0;
+		}
+		int i = 0;
+	}
 	
 	DXGI_SWAP_CHAIN_DESC scd;
 	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -54,21 +46,31 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	
 	D3D_FEATURE_LEVEL FeatureLevelsRequested = D3D_FEATURE_LEVEL_11_0;
 	UINT numLevelsRequested = 1;
-	D3D_FEATURE_LEVEL FeatureLevelsSupported;
-	HRESULT hr;
+
 	hr = D3D11CreateDeviceAndSwapChain(
-		NULL,
-		D3D_DRIVER_TYPE_HARDWARE,
-		NULL,
-		NULL,
-		NULL,
-		NULL,
-		D3D11_SDK_VERSION,
-		&scd,
-		&sc,
-		&d3ddev,
-		NULL,
-		&d3dctx);
+		NULL,						//	pAdapter
+		D3D_DRIVER_TYPE_HARDWARE,	//	DriverType
+		NULL,						//	Software
+		NULL,						//	Flags
+		&FeatureLevelsRequested,	//	pFeatureLevels
+		1,							//  FeatureLevels
+		D3D11_SDK_VERSION,			//	SDKVersion
+		&scd,						//	pSwapChainDesc
+		&sc,						//	ppSwapChain
+		&d3ddev,					//	ppDevice
+		NULL,						//	pFeatureLevel
+		&d3dctx);					//	ppImmediateContext
+
+	if (FAILED(hr)) {
+		if (hr == E_INVALIDARG) {
+			int i = 0;
+		}
+		else if (hr == DXGI_ERROR_INVALID_CALL)
+		{
+			int i = 0;
+		}
+		int i = 0;
+	}
 
 	hr = sc->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&d3dbb);
 
@@ -91,8 +93,8 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	
 	ID3D10Blob* VS, * PS;
 	ID3D10Blob* msg = NULL;
-	hr = D3DCompileFromFile(L"shader.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &msg);
-	hr = D3DCompileFromFile(L"shader.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &msg);
+	hr = D3DCompileFromFile(L"Shader.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &msg);
+	hr = D3DCompileFromFile(L"Shader.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &msg);
 
 	hr = d3ddev->CreateVertexShader( VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
 	d3ddev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
@@ -143,7 +145,12 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	//dili.MipFilter = D3DX11_DEFAULT;
 	//dili.pSrcInfo = NULL;
 
-
 	//hr = D3DX11CreateShaderResourceViewFromFile(d3ddev, L"awdli-om21s.dds", &dili, NULL, &m_texture, NULL);
 	
+}
+
+void Renderer::Render() {
+	float color[4] = { 0.0f, 2.0f, 1.0f, 255 };
+	d3dctx->ClearRenderTargetView(view, color);
+	HRESULT res = sc->Present(0, 0);
 }

@@ -43,12 +43,13 @@ WinMain(HINSTANCE Instance,
 	int width = 800;
 	int height = 600;
 
-	//Renderer::Initialize();
-	Platform::OpenWindow(width, height, Instance, &Win32MainWindowCallback);
-	Renderer::Initialize(Platform::WindowHandle,800,600);
+	Renderer r;
+	Platform p;
+	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
+	r.Initialize(p.WindowHandle,800,600);
 	
-	//Platform::OpenWindow(width, height, Instance, &Win32MainWindowCallback);
 	while (true)
 	{
+		r.Render();
 	}
 }

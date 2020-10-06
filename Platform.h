@@ -2,7 +2,7 @@
 class Platform
 {
 public:
-	static int OpenWindow(int width, int height, HINSTANCE Instance, WNDPROC callback);
-	static HWND WindowHandle;
+	int OpenWindow(int width, int height, HINSTANCE Instance, int ShowCode, WNDPROC callback);
+	HWND WindowHandle;
 };
 

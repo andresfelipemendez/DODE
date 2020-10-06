@@ -1,11 +1,9 @@
 #include <windows.h>
 #include "Platform.h"
 
-HWND Platform::WindowHandle;
 
-int Platform::OpenWindow(int width, int height, HINSTANCE Instance, WNDPROC callback)
+int Platform::OpenWindow(int width, int height, HINSTANCE Instance, int ShowCode, WNDPROC callback)
 {
-	HWND WindowHandle;
 	WNDCLASSEX wnd;
 	ZeroMemory(&wnd, sizeof(WNDCLASSEX));
 
@@ -40,5 +38,8 @@ int Platform::OpenWindow(int width, int height, HINSTANCE Instance, WNDPROC call
 		system("PAUSE");
 		return -1;
 	}
+
+	ShowWindow(WindowHandle, ShowCode);
+
 	return 0;
 }
