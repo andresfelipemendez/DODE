@@ -154,3 +154,88 @@ void Renderer::Render() {
 	d3dctx->ClearRenderTargetView(view, color);
 	HRESULT res = sc->Present(0, 0);
 }
+
+ID3D11Buffer* Renderer::CreateIndexBuffer(const tinygltf::BufferView& bufferView, const tinygltf::Buffer& buffer)
+{
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = bufferView.byteLength;
+	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(InitData));
+	InitData.pSysMem = &buffer.data.at(0) + bufferView.byteOffset;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	ID3D11Buffer* pIndexBuffer = 0;
+	HRESULT hr = d3ddev->CreateBuffer( &bufferDesc, &InitData, &pIndexBuffer);
+	if (!FAILED(hr)) {
+		return pIndexBuffer;
+	}
+	return nullptr;
+}
+
+void Renderer::CreateVertexBuffer(const tinygltf::BufferView& bufferView, const tinygltf::Buffer& buffer)
+{
+	// GL_ELEMENT_ARRAY_BUFFER
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.ByteWidth = bufferView.byteLength;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(InitData));
+	InitData.pSysMem = &buffer.data.at(0) + bufferView.byteOffset;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	ID3D11Buffer* pVertexBuffer = 0;
+	d3ddev->CreateBuffer( &bufferDesc, NULL, &pVertexBuffer);
+
+	//unsigned int sovc = sizeof(vertices[0]) * size;
+	D3D11_MAPPED_SUBRESOURCE ms;
+
+	d3dctx->Map( pVertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	memcpy(ms.pData, &buffer.data.at(0) + bufferView.byteOffset, bufferView.byteLength);
+	d3dctx->Unmap( pVertexBuffer, NULL);
+
+	//return pVertexBuffer;
+}
+
+/*
+void Renderer::SetBuffers(vector3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer)
+{
+	D3D11_MAPPED_SUBRESOURCE resource;
+
+
+	//CalculateMatrix(pos);
+
+	HRESULT result = d3dctx->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	dataPtr->world = worldMatrix;
+	dataPtr->view = viewMatrix;
+	dataPtr->projection = projectionMatrix;
+
+	//d3dctx->lpVtbl->Unmap(d3dctx, m_matrixBuffer, 0);
+
+	//bufferNumber = 0;
+
+	d3dctx->lpVtbl->VSSetConstantBuffers(d3dctx, bufferNumber, 1, &m_matrixBuffer);
+	d3dctx->lpVtbl->PSSetShaderResources(d3dctx, 0, 1, &m_texture);
+
+	unsigned int off = 0;
+	unsigned int str = sizeof(SimpleVertexCombined);
+	d3dctx->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	d3dctx->IASetVertexBuffers(0, 1, &vertexBuffer, &str, &off);
+
+	d3dctx->DrawIndexed(numIndices, 0, 0);
+}
+*/

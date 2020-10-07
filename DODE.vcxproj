@@ -146,6 +146,7 @@
     <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Math.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
