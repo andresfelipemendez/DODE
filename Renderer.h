@@ -3,6 +3,9 @@
 
 #include "tiny_gltf.h"
 
+const int GL_ARRAY_BUFFER = 34962;
+const int GL_ELEMENT_ARRAY_BUFFER = 34963;
+
 struct MatrixBufferType;
 
 class Renderer
@@ -10,8 +13,8 @@ class Renderer
 public:
 	void Initialize(HWND WindowHandle, int SCREEN_WIDTH, int SCREEN_HEIGHT);
 	//void SetBuffers(vector3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer);
-	ID3D11Buffer* CreateIndexBuffer(const tinygltf::BufferView& bufferView, const tinygltf::Buffer& buffer);
-	void CreateVertexBuffer(const tinygltf::BufferView& bufferView, const tinygltf::Buffer& buffer);
+	ID3D11Buffer* CreateBuffer(const tinygltf::BufferView& bufferView, const tinygltf::Buffer& buffer);
+	//void CreateVertexBuffer(const tinygltf::BufferView& bufferView, const tinygltf::Buffer& buffer);
 	void Render();
 	ID3D11Device* d3ddev;
 	ID3D11DeviceContext* d3dctx;

@@ -76,24 +76,57 @@ void bindModelNodes(tinygltf::Model& model, tinygltf::Node& node) {
 		{
 			const tinygltf::BufferView& bufferView = model.bufferViews[j];
 			if (bufferView.target == 0) {
-				std::cout << "WARN: bufferView.target is zero" << std::endl;
+				OutputDebugStringA("WARN: bufferView.target is zero\n");
 				continue;
 			}
 
 			const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
-			std::cout << "bufferview.target " << bufferView.target << "\n";
-
-			indexbuffer = r.CreateIndexBuffer(bufferView, buffer);
 
 			tinygltf::Mesh& mesh = model.meshes[node.mesh];
+
+			std::string msg("bufferview.target ");
+			msg += std::to_string(bufferView.target);
+			msg += "\n";
+
+			switch (bufferView.target)
+			{
+			case GL_ARRAY_BUFFER: 
+			case GL_ELEMENT_ARRAY_BUFFER: 
+				r.CreateBuffer(bufferView, buffer);
+
+				OutputDebugStringA(msg.c_str());
+
+				break;
+			default:
+				std::cout << "bufferview.target " << bufferView.target << "\n";
+				break;
+			}
+
+			/*
 			for (size_t j = 0; j < mesh.primitives.size(); ++j) {
 				tinygltf::Primitive primitive = mesh.primitives[j];
 				tinygltf::Accessor indexAccesor = model.accessors[primitive.indices];
 
 				for (auto& attrib : primitive.attributes) {
 
+					tinygltf::Accessor accesor = model.accessors[attrib.second];
+					int byteStride = accesor.ByteStride(model.bufferViews[accesor.bufferView]);
+
+					int vaa = -1;
+					if (attrib.first.compare("POSITION") == 0) vaa = 0;
+					if (attrib.first.compare("NORMAL") == 0) vaa = 1;
+					if (attrib.first.compare("TEXCOORD_0") == 0) vaa = 2;
+
+					//glVertexAttribPointer(
+					//	vaa, 
+					//	size, 
+					//	accessor.componentType,
+					//	accessor.normalized ? GL_TRUE : GL_FALSE,
+					//	byteStride, 
+					//	BUFFER_OFFSET(accessor.byteOffset))
 				}
 			}
+			*/
 		}
 	}
 
