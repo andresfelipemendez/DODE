@@ -58,6 +58,9 @@ WinMain(HINSTANCE Instance,
 
 	while (true)
 	{
+		r.Clear();
+		vec3 pos = { 0,0,-10.0f };
+		r.SetBuffers(pos, cube.numIndices, cube.indexBuffer, cube.vertexBuffer);
 		r.Render();
 	}
 }

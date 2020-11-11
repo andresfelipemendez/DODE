@@ -8,9 +8,9 @@
 
 struct MatrixBufferType
 {
-	float world[4][4];
-	float view[4][4];
-	float projection[4][4];
+	DirectX::XMMATRIX world;
+	DirectX::XMMATRIX view;
+	DirectX::XMMATRIX projection;
 };
 
 void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
@@ -120,7 +120,7 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  D3D11_APPEND_ALIGNED_ELEMENT , D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  D3D11_APPEND_ALIGNED_ELEMENT , D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,  D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	
@@ -149,11 +149,36 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 
 	//hr = D3DX11CreateShaderResourceViewFromFile(d3ddev, L"awdli-om21s.dds", &dili, NULL, &m_texture, NULL);
 	
+	float fieldOfView = DirectX::XM_PI / 4.0f;
+	float screenAspect = (float)800 / (float)600;
+	//D3DXMatrixPerspectiveFovLH(&projectionMatrix, fieldOfView, screenAspect, 0.03f, 100.0f);
+	projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.03f, 100.0f);
+	
+	//D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
+	projectionMatrix = DirectX::XMMatrixTranspose(projectionMatrix);
+
+	D3D11_BUFFER_DESC matrixBufferDesc;
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+	HRESULT result = d3ddev->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
+
+	//D3DXMatrixIdentity(&worldMatrix);
+	worldMatrix = DirectX::XMMatrixIdentity();
+	
+	//D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
+	worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+}
+
+void Renderer::Clear() {
+	float color[4] = { 0.0f, 0.5f, 0.5f, 1.0f };
+	d3dctx->ClearRenderTargetView(view, color);
 }
 
 void Renderer::Render() {
-	float color[4] = { 0.0f, 2.0f, 1.0f, 255 };
-	d3dctx->ClearRenderTargetView(view, color);
 	HRESULT res = sc->Present(0, 0);
 }
 
@@ -207,4 +232,57 @@ void* Renderer::CreateIndexBuffer(unsigned int* indices, unsigned int size)
 	return pIndexBuffer;
 }
 
+void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer)
+{
+	D3D11_MAPPED_SUBRESOURCE resource;
 
+	CalculateMatrix(pos);
+
+	HRESULT result = d3dctx->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	dataPtr->world = worldMatrix;
+	dataPtr->view = viewMatrix;
+	dataPtr->projection = projectionMatrix;
+
+	d3dctx->Unmap( m_matrixBuffer, 0);
+
+	bufferNumber = 0;
+	d3dctx->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+	d3dctx->PSSetShaderResources(0, 1, &m_texture);
+
+	unsigned int off = 0;
+	unsigned int str = sizeof(Vertex);
+	d3dctx->IASetIndexBuffer((ID3D11Buffer*)indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	d3dctx->IASetVertexBuffers(0, 1, (ID3D11Buffer*const*)&vertexBuffer, &str, &off);
+
+	d3dctx->DrawIndexed(numIndices, 0, 0);
+}
+
+void Renderer::CalculateMatrix(vec3 p) {
+	vec3 rot;
+
+	rot.x = 0; //yaw
+	rot.y = 0; //pitch
+	rot.z = 0; //roll
+
+	// D3DXMatrixRotationYawPitchRoll(&rotationMatrix, rot.x, rot.y, rot.z);
+	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(rot.z, rot.y, rot.x);
+	
+	// D3DXVec3TransformCoord(&lookAt, &lookAt, &rotationMatrix);
+	DirectX::XMVECTOR lookAt = DirectX::XMVectorSet(0,0,1.0f,0);
+	lookAt = DirectX::XMVector3TransformCoord(lookAt, rotm);
+
+	//D3DXVec3TransformCoord(&up, &up, &rotationMatrix);
+	DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1.0f, 0, 0);
+	up = DirectX::XMVector3TransformCoord(up, rotm);
+
+	// lookAt = add(position, lookAt);
+	DirectX::XMVECTOR pos = DirectX::XMVectorSet(p.x, p.y, p.z, 0);
+	lookAt = DirectX::XMVectorAdd(pos, lookAt);
+
+	// D3DXMatrixLookAtLH(&viewMatrix, &position, &lookAt, &up);
+	// D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
+	viewMatrix = DirectX::XMMatrixLookAtLH(pos, lookAt, up);
+	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
+}

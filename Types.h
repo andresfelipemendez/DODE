@@ -17,4 +17,5 @@ struct Vertex {
 struct Mesh {
 	void* indexBuffer;
 	void* vertexBuffer;
+	size_t numIndices;
 };
