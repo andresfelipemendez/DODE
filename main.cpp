@@ -54,7 +54,7 @@ WinMain(HINSTANCE Instance,
 	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
 	r.Initialize(p.WindowHandle,800,600);
 	
-	Mesh cube = l.LoadOBJ("cube.obj", &r);
+	Mesh cube = l.LoadOBJ("cube.obj", r);
 
 	while (true)
 	{

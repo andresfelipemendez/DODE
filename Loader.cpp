@@ -49,7 +49,7 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
                 &vIndex[0], &uvIndex[0], &nIndex[0],
                 &vIndex[1], &uvIndex[1], &nIndex[1],
                 &vIndex[2], &uvIndex[2], &nIndex[2]);
-            if (matches != 0) {
+            if (matches != 9) {
                 // error
                 return m;
             }
@@ -63,11 +63,29 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
             normalIndices.push_back(nIndex[1] - 1);
             normalIndices.push_back(nIndex[2] - 1);
         }
-
-
-
-        //r.CreateVertexBuffer()
     }
+
+    std::vector<Vertex> vertexBuffer;
+
+    for (size_t i = 0; i < vertices.size(); ++i) {
+        Vertex v;
+        v.position[0] = vertices[i].x;
+        v.position[1] = vertices[i].y;
+        v.position[2] = vertices[i].z;
+
+        vertexBuffer.push_back(v);
+    }
+
+    for (size_t i = 0; i < vertexIndices.size(); ++i) {
+        vertexBuffer[vertexIndices[i]].uv[0] = uvs[uvIndices[i]].x;
+        vertexBuffer[vertexIndices[i]].uv[1] = uvs[uvIndices[i]].y;
+        vertexBuffer[vertexIndices[i]].normal[0] = normals[normalIndices[i]].x;
+        vertexBuffer[vertexIndices[i]].normal[1] = normals[normalIndices[i]].y;
+        vertexBuffer[vertexIndices[i]].normal[2] = normals[normalIndices[i]].z;
+    }
+
+    m.vertexBuffer = r.CreateVertexBuffer(&vertexBuffer[0], vertexBuffer.size());
+    m.indexBuffer = r.CreateIndexBuffer(&vertexIndices[0], vertexIndices.size());
 
     return Mesh();
 }

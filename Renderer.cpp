@@ -159,10 +159,52 @@ void Renderer::Render() {
 
 void* Renderer::CreateVertexBuffer(Vertex* vertices, size_t size)
 {
-	d3ddev->
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.ByteWidth = sizeof(vertices[0]) * size;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(InitData));
+	InitData.pSysMem = vertices;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	ID3D11Buffer* pVertexBuffer = 0;
+	d3ddev->CreateBuffer(&bufferDesc, NULL, &pVertexBuffer);
+
+	unsigned int sovc = sizeof(vertices[0]) * size;
+	D3D11_MAPPED_SUBRESOURCE ms;
+
+	d3dctx->Map(pVertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	memcpy(ms.pData, vertices, sizeof(vertices[0]) * size);
+	d3dctx->Unmap(pVertexBuffer, NULL);
 		
-	return nullptr;
+	return pVertexBuffer;
 }
 
+void* Renderer::CreateIndexBuffer(unsigned int* indices, unsigned int size)
+{
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.ByteWidth = sizeof(unsigned int) * size;
+	bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA InitData;
+	ZeroMemory(&InitData, sizeof(InitData));
+	InitData.pSysMem = indices;
+	InitData.SysMemPitch = 0;
+	InitData.SysMemSlicePitch = 0;
+
+	ID3D11Buffer* pIndexBuffer = 0;
+	d3ddev->CreateBuffer(&bufferDesc, &InitData, &pIndexBuffer);
+
+	return pIndexBuffer;
+}
 
 
