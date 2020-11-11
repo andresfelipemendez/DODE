@@ -87,5 +87,5 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
     m.vertexBuffer = r.CreateVertexBuffer(&vertexBuffer[0], vertexBuffer.size());
     m.indexBuffer = r.CreateIndexBuffer(&vertexIndices[0], vertexIndices.size());
     m.numIndices = vertexIndices.size();
-    return Mesh();
+    return m;
 }

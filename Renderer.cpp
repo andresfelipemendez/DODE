@@ -96,7 +96,26 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	ID3D10Blob* VS, * PS;
 	ID3D10Blob* msg = NULL;
 	hr = D3DCompileFromFile(L"Shader.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &msg);
+
+	if (FAILED(hr))
+	{
+		if (msg)
+		{
+			OutputDebugStringA((char*)msg->GetBufferPointer());
+			msg->Release();
+		}
+	}
+
 	hr = D3DCompileFromFile(L"Shader.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &msg);
+
+	if (FAILED(hr))
+	{
+		if (msg)
+		{
+			OutputDebugStringA((char*)msg->GetBufferPointer());
+			msg->Release();
+		}
+	}
 
 	hr = d3ddev->CreateVertexShader( VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
 	d3ddev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
@@ -120,7 +139,7 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	D3D11_INPUT_ELEMENT_DESC ied[] =
 	{
 		{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0,  D3D11_APPEND_ALIGNED_ELEMENT , D3D11_INPUT_PER_VERTEX_DATA, 0},
+		{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  D3D11_APPEND_ALIGNED_ELEMENT , D3D11_INPUT_PER_VERTEX_DATA, 0},
 		{"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0,  D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0}
 	};
 	
