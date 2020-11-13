@@ -5,6 +5,23 @@
 #include <string>
 #include <vector>
 
+enum class OBJLoadState {
+    None,
+    Vertices,
+    Uvs,
+    Faces
+};
+
+Mesh SendToGPU(std::vector<Vertex> &vertexBuffer, std::vector<uint32_t> &vertexIndices, Renderer& r) {
+
+    Mesh m = Mesh();
+    m.vertexBuffer = r.CreateVertexBuffer(&vertexBuffer[0], vertexBuffer.size());
+    m.indexBuffer = r.CreateIndexBuffer(&vertexIndices[0], vertexIndices.size());
+    m.numIndices = vertexIndices.size();
+    return m;
+}
+
+
 Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 {
     Mesh m = Mesh();
@@ -15,6 +32,65 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
     std::vector<uint32_t> uvIndices;
     std::vector<uint32_t> normalIndices;
 
+    std::string line;
+    std::ifstream myfile(path);
+    
+    OBJLoadState state = OBJLoadState::None;
+    if (myfile.is_open())
+    {
+        while (getline(myfile, line)) {
+            if (line[0] == 'v' && line[1] == ' ' ) {
+                if (state == OBJLoadState::None) {
+                    vec3 v;
+                    int res = sscanf(line.c_str(), " %*c %f %f %f\n", &v.x, &v.y, &v.z);
+                    vertices.push_back(v);
+                    state = OBJLoadState::Vertices;
+                }
+                else {
+                    std::vector<Vertex> vertexBuffer;
+                    for (size_t i = 0; i < vertices.size(); ++i) {
+                        Vertex v;
+                        v.position[0] = vertices[i].x;
+                        v.position[1] = vertices[i].y;
+                        v.position[2] = vertices[i].z;
+
+                        vertexBuffer.push_back(v);
+                    }
+
+                    for (size_t i = 0; i < vertexIndices.size(); ++i) {
+                        vertexBuffer[vertexIndices[i]].uv[0] = uvs[uvIndices[i]].x;
+                        vertexBuffer[vertexIndices[i]].uv[1] = uvs[uvIndices[i]].y;
+                        /*vertexBuffer[vertexIndices[i]].normal[0] = normals[normalIndices[i]].x;
+                        vertexBuffer[vertexIndices[i]].normal[1] = normals[normalIndices[i]].y;
+                        vertexBuffer[vertexIndices[i]].normal[2] = normals[normalIndices[i]].z;*/
+                    }
+                    return SendToGPU(vertexBuffer, vertexIndices, r);
+                }
+            }
+
+            if (line[0] == 'v' && line[1] == 't') {
+                vec2 uv;
+                int res = sscanf(line.c_str(), " %*s %f %f %*f\n", &uv.x, &uv.y);
+                uvs.push_back(uv);
+            }
+
+            if (line[0] == 'f') {
+                unsigned int vIndex[3], uvIndex[3];
+                int res = sscanf(line.c_str(), " %*c %u/%u %u/%u %u/%u\n",
+                    &vIndex[0], &uvIndex[0], 
+                    &vIndex[1], &uvIndex[1],
+                    &vIndex[2], &uvIndex[2]);
+                vertexIndices.push_back(vIndex[0] - 1);
+                vertexIndices.push_back(vIndex[1] - 1);
+                vertexIndices.push_back(vIndex[2] - 1);
+                uvIndices.push_back(uvIndex[0] - 1);
+                uvIndices.push_back(uvIndex[1] - 1);
+                uvIndices.push_back(uvIndex[2] - 1);
+            }
+        }
+    }
+
+    /*
     FILE* file = fopen(path.c_str(), "r");
     if (file == nullptr) {
         //error
@@ -64,28 +140,11 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
             normalIndices.push_back(nIndex[2] - 1);
         }
     }
+    */
 
-    std::vector<Vertex> vertexBuffer;
+    
 
-    for (size_t i = 0; i < vertices.size(); ++i) {
-        Vertex v;
-        v.position[0] = vertices[i].x;
-        v.position[1] = vertices[i].y;
-        v.position[2] = vertices[i].z;
+    
 
-        vertexBuffer.push_back(v);
-    }
-
-    for (size_t i = 0; i < vertexIndices.size(); ++i) {
-        vertexBuffer[vertexIndices[i]].uv[0] = uvs[uvIndices[i]].x;
-        vertexBuffer[vertexIndices[i]].uv[1] = uvs[uvIndices[i]].y;
-        vertexBuffer[vertexIndices[i]].normal[0] = normals[normalIndices[i]].x;
-        vertexBuffer[vertexIndices[i]].normal[1] = normals[normalIndices[i]].y;
-        vertexBuffer[vertexIndices[i]].normal[2] = normals[normalIndices[i]].z;
-    }
-
-    m.vertexBuffer = r.CreateVertexBuffer(&vertexBuffer[0], vertexBuffer.size());
-    m.indexBuffer = r.CreateIndexBuffer(&vertexIndices[0], vertexIndices.size());
-    m.numIndices = vertexIndices.size();
     return m;
 }
