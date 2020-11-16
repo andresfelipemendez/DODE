@@ -15,10 +15,13 @@ public:
 	void Clear();
 	void Render();
 
+	void CameraRotation(vec2 dir, double deltaTime);
 	void* CreateVertexBuffer(Vertex* vertices, size_t size);
 	void* CreateIndexBuffer(unsigned int* indices, unsigned int size);
 	void SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer);
 private:
+
+	vec3 lookAt_;
 	ID3D11Device* d3ddev;
 	ID3D11DeviceContext* d3dctx;
 	IDXGISwapChain* sc;

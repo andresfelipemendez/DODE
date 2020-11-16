@@ -17,6 +17,9 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 {
 	HRESULT hr;
 
+	lookAt_.x = 0;
+	lookAt_.y = 0;
+
 	IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
 	IDXGIOutput* output;
@@ -170,10 +173,9 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	
 	float fieldOfView = DirectX::XM_PI / 4.0f;
 	float screenAspect = (float)800 / (float)600;
-	//D3DXMatrixPerspectiveFovLH(&projectionMatrix, fieldOfView, screenAspect, 0.03f, 100.0f);
+
 	projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.03f, 100.0f);
 	
-	//D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
 	projectionMatrix = DirectX::XMMatrixTranspose(projectionMatrix);
 
 	D3D11_BUFFER_DESC matrixBufferDesc;
@@ -185,10 +187,8 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	matrixBufferDesc.StructureByteStride = 0;
 	HRESULT result = d3ddev->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
 
-	//D3DXMatrixIdentity(&worldMatrix);
 	worldMatrix = DirectX::XMMatrixIdentity();
 	
-	//D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
 	worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
 }
 
@@ -199,6 +199,12 @@ void Renderer::Clear() {
 
 void Renderer::Render() {
 	HRESULT res = sc->Present(0, 0);
+}
+
+void Renderer::CameraRotation(vec2 dir, double deltaTime)
+{
+	lookAt_.x += dir.x * deltaTime;
+	lookAt_.y += dir.x * deltaTime;
 }
 
 void* Renderer::CreateVertexBuffer(Vertex* vertices, size_t size)

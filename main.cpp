@@ -2,45 +2,11 @@
 #include "Platform.h"
 #include "Renderer.h"
 
-#include <fstream>
-#include <iostream>
 #include "Loader.h"
+#include "Time.h"
+#include "Input.h"
 
-Renderer r;
-Platform p;
-Loader l;
 
-LRESULT CALLBACK
-Win32MainWindowCallback(HWND Window,
-	UINT Message,
-	WPARAM WParam,
-	LPARAM LParam)
-{
-	LRESULT Result = 0;
-	switch (Message)
-	{
-	case WM_DESTROY:
-	{
-		PostQuitMessage(0);
-		return 0;
-	}
-	break;
-	case WM_SYSKEYDOWN:
-	case WM_KEYDOWN:
-	{
-		switch (WParam)
-		{
-		case VK_ESCAPE:
-			PostQuitMessage(0);
-			return 0;
-		default:
-			break;
-		}
-	}
-	break;
-	}
-	return DefWindowProc(Window, Message, WParam, LParam);
-}
 
 int CALLBACK
 WinMain(HINSTANCE Instance,
@@ -48,20 +14,41 @@ WinMain(HINSTANCE Instance,
 	LPSTR CommandLine,
 	int ShowCode)
 {
+	Renderer r;
+	Platform p;
+	Loader l;
 	int width = 800;
 	int height = 600;
 
 	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
-	r.Initialize(p.WindowHandle,800,600);
+	r.Initialize(p.WindowHandle, width, height);
 	
-	//Mesh cube = l.LoadOBJ("cube.obj", r);
-	Mesh cube = l.LoadOBJ("Assets/Island/Island.obj", r);
+	Mesh cube = l.LoadOBJ("cube.obj", r);
+	
+	Time::Init();
 
+	MSG Message = { 0 };
 	while (true)
 	{
+		Time::Tick();
+		
+		//r.CameraRotation(dir);
+
+		if (PeekMessage(&Message, 0, 0, 0, PM_REMOVE) > 0)
+		{
+			TranslateMessage(&Message);
+			DispatchMessage(&Message);
+			if (Message.message == WM_QUIT)
+			{
+				break;
+			}
+		}
+
 		r.Clear();
-		vec3 pos = { 0,0,-10.0f };
+
+		vec3 pos = { 0, 0, -20.0f };
 		r.SetBuffers(pos, cube.numIndices, cube.indexBuffer, cube.vertexBuffer);
+
 		r.Render();
 	}
 }

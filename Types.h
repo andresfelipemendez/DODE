@@ -6,7 +6,7 @@ struct vec3
 
 struct vec2
 {
-	float x, y;
+	float x = 0, y = 0;
 };
 
 struct Vertex {
