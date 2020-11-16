@@ -31,7 +31,7 @@ void Time::Tick() {
 	previousTime = currentTime;
 }
 
-//double Time::GetDeltaTime()
-//{
-//	return deltaTime;
-//}
+double Time::GetDeltaTime()
+{
+	return deltaTime;
+}

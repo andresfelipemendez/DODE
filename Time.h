@@ -7,10 +7,11 @@ class Time
 public:
 	static void Init();
 	static void Tick();
+
+	static double GetDeltaTime();
 	/*static 
 	static 
-	
-	static double GetDeltaTime();*/
+	*/
 private:
 	static long long int GetTimeNow();
 	static double GetSecondsPerCount();

@@ -38,7 +38,7 @@ WinMain(HINSTANCE Instance,
 		auto lt = Input::GetLeftThumb();
 		Log(lt);
 
-		//r.CameraRotation(dir);
+		r.CameraRotation(lt, Time::GetDeltaTime());
 
 		if (PeekMessage(&Message, 0, 0, 0, PM_REMOVE) > 0)
 		{

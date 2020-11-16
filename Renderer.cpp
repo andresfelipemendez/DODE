@@ -204,7 +204,7 @@ void Renderer::Render() {
 void Renderer::CameraRotation(vec2 dir, double deltaTime)
 {
 	lookAt_.x += dir.x * deltaTime;
-	lookAt_.y += dir.x * deltaTime;
+	lookAt_.y += dir.y * deltaTime;
 }
 
 void* Renderer::CreateVertexBuffer(Vertex* vertices, size_t size)
@@ -287,27 +287,21 @@ void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, 
 void Renderer::CalculateMatrix(vec3 p) {
 	vec3 rot;
 
-	rot.x = 0; //yaw
-	rot.y = 0; //pitch
-	rot.z = 0; //roll
+	//rot.x = 0; //yaw
+	//rot.y = 0; //pitch
+	//rot.z = 0; //roll
 
-	// D3DXMatrixRotationYawPitchRoll(&rotationMatrix, rot.x, rot.y, rot.z);
 	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(rot.z, rot.y, rot.x);
 	
-	// D3DXVec3TransformCoord(&lookAt, &lookAt, &rotationMatrix);
-	DirectX::XMVECTOR lookAt = DirectX::XMVectorSet(0,0,1.0f,0);
+	DirectX::XMVECTOR lookAt = DirectX::XMVectorSet(lookAt_.x, lookAt_.y,1.0f,0);
 	lookAt = DirectX::XMVector3TransformCoord(lookAt, rotm);
 
-	//D3DXVec3TransformCoord(&up, &up, &rotationMatrix);
 	DirectX::XMVECTOR up = DirectX::XMVectorSet(0, 1.0f, 0, 0);
 	up = DirectX::XMVector3TransformCoord(up, rotm);
 
-	// lookAt = add(position, lookAt);
 	DirectX::XMVECTOR pos = DirectX::XMVectorSet(p.x, p.y, p.z, 0);
 	lookAt = DirectX::XMVectorAdd(pos, lookAt);
 
-	// D3DXMatrixLookAtLH(&viewMatrix, &position, &lookAt, &up);
-	// D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
 	viewMatrix = DirectX::XMMatrixLookAtLH(pos, lookAt, up);
 	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
 }
