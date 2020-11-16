@@ -46,6 +46,34 @@ vec2 Input::GetLeftThumb()
 	}
 }
 
+vec2 Input::get_right_thumb()
+{
+	vec2 right;
+	right.x = state.Gamepad.sThumbRX;
+	right.y = state.Gamepad.sThumbRY;
+
+	auto magnitude = static_cast<float>(sqrt(
+		static_cast<double>(right.x) * static_cast<double>(right.x) +
+		static_cast<double>(right.y) * static_cast<double>(right.y)));
+	const auto normalized_lx = right.x / magnitude;
+	const auto normalized_ly = right.y / magnitude;
+
+	
+	if (magnitude > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+	{
+		if (magnitude > 32767) magnitude = 32767;
+
+		magnitude -= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
+
+		
+		right.x = normalized_lx;
+		right.y = normalized_ly;
+		return right;
+	}
+	right = {0,0};
+	return right;
+}
+
 LRESULT CALLBACK
 Win32MainWindowCallback(HWND Window,
 	UINT Message,

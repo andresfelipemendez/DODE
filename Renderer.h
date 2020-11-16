@@ -19,9 +19,12 @@ public:
 	void* CreateVertexBuffer(Vertex* vertices, size_t size);
 	void* CreateIndexBuffer(unsigned int* indices, unsigned int size);
 	void SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer);
+	void CameraPosition(const vec2& lt, double get_delta_time);
 private:
-
-	vec3 lookAt_;
+	vec3 camera_pos_;
+	vec3 rot_;
+	vec3 look_at_;
+	
 	ID3D11Device* d3ddev;
 	ID3D11DeviceContext* d3dctx;
 	IDXGISwapChain* sc;

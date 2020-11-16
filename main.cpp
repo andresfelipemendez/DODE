@@ -36,9 +36,10 @@ WinMain(HINSTANCE Instance,
 		Input::Update();
 		
 		auto lt = Input::GetLeftThumb();
-		Log(lt);
-
-		r.CameraRotation(lt, Time::GetDeltaTime());
+		//auto rt = Input::get_right_thumb();
+		
+		r.CameraPosition(lt, Time::GetDeltaTime());
+		r.CameraRotation(Input::get_right_thumb(), Time::GetDeltaTime());
 
 		if (PeekMessage(&Message, 0, 0, 0, PM_REMOVE) > 0)
 		{
