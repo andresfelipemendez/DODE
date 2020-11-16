@@ -274,7 +274,7 @@ void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, 
 
 	bufferNumber = 0;
 	d3dctx->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
-	d3dctx->PSSetShaderResources(0, 1, &m_texture);
+	//d3dctx->PSSetShaderResources(0, 1, &m_texture);
 
 	unsigned int off = 0;
 	unsigned int str = sizeof(Vertex);

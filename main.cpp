@@ -6,7 +6,7 @@
 #include "Time.h"
 #include "Input.h"
 
-
+#include "Utils.h"
 
 int CALLBACK
 WinMain(HINSTANCE Instance,
@@ -28,10 +28,16 @@ WinMain(HINSTANCE Instance,
 	Time::Init();
 
 	MSG Message = { 0 };
+
+	
 	while (true)
 	{
 		Time::Tick();
+		Input::Update();
 		
+		auto lt = Input::GetLeftThumb();
+		Log(lt);
+
 		//r.CameraRotation(dir);
 
 		if (PeekMessage(&Message, 0, 0, 0, PM_REMOVE) > 0)
@@ -46,7 +52,7 @@ WinMain(HINSTANCE Instance,
 
 		r.Clear();
 
-		vec3 pos = { 0, 0, -20.0f };
+		vec3 pos = { 0, 5, -20.0f };
 		r.SetBuffers(pos, cube.numIndices, cube.indexBuffer, cube.vertexBuffer);
 
 		r.Render();
