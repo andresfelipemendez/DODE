@@ -6,3 +6,8 @@ void Log(vec2 v) {
 	s += std::to_string(v.y) + "\n";
 	OutputDebugStringA(s.c_str());
 }
+
+void Log(const char* v)
+{
+	OutputDebugStringA(v);
+}

@@ -22,7 +22,8 @@ WinMain(HINSTANCE Instance,
 
 	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
 	r.Initialize(p.WindowHandle, width, height);
-	
+
+	auto texture = l.LoadImage("Assets\\Textures\\OutsSS04.png", r);
 	Mesh cube = l.LoadOBJ("cube.obj", r);
 	
 	Time::Init();
@@ -54,7 +55,7 @@ WinMain(HINSTANCE Instance,
 		r.Clear();
 
 		vec3 pos = { 0, 5, -20.0f };
-		r.SetBuffers(pos, cube.numIndices, cube.indexBuffer, cube.vertexBuffer);
+		r.SetBuffers(pos, cube.numIndices, cube.indexBuffer, cube.vertexBuffer, texture);
 
 		r.Render();
 	}

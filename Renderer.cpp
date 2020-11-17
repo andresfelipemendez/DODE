@@ -115,7 +115,7 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	{
 		if (msg)
 		{
-			OutputDebugStringA((char*)msg->GetBufferPointer());
+			OutputDebugStringA(static_cast<char*>(msg->GetBufferPointer()));
 			msg->Release();
 		}
 	}
@@ -257,7 +257,66 @@ void* Renderer::CreateIndexBuffer(unsigned int* indices, unsigned int size)
 	return pIndexBuffer;
 }
 
-void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer)
+void* Renderer::create_texture_buffer(const unsigned char* data,int x,int y,int n) const
+{
+	D3D11_TEXTURE2D_DESC desc;
+	desc.Width = x;
+	desc.Height = y;
+	desc.MipLevels = 0;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.SampleDesc.Quality= 0;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE |D3D11_BIND_RENDER_TARGET ;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA d[1];
+	d[0].pSysMem = data;
+	d[0].SysMemPitch = (x * n) * sizeof(unsigned char);
+;
+	ID3D11Texture2D *pTexture = NULL;
+	HRESULT  hr = d3ddev->CreateTexture2D( &desc, NULL, &pTexture );
+
+	if (FAILED(hr))
+	{
+		return pTexture;
+	}
+
+	d3dctx->UpdateSubresource(
+		pTexture,
+		0,
+		NULL,
+		data,
+		(x * 4) * sizeof(unsigned char),
+		0
+	);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = desc.Format;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = -1;
+
+	ID3D11ShaderResourceView* textureView;
+	hr = d3ddev->CreateShaderResourceView(
+	  pTexture,
+	  &srvDesc,
+	  &textureView
+	);
+
+	if (FAILED(hr))
+	{
+		return pTexture;
+	}
+
+	d3dctx->GenerateMips(textureView);
+	
+	return textureView;
+}
+
+void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer, void* texture)
 {
 	D3D11_MAPPED_SUBRESOURCE resource;
 
@@ -274,7 +333,8 @@ void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, 
 
 	bufferNumber = 0;
 	d3dctx->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
-	//d3dctx->PSSetShaderResources(0, 1, &m_texture);
+	auto tx = static_cast<ID3D11ShaderResourceView*>(texture);
+	d3dctx->PSSetShaderResources(0, 1, &tx);
 
 	unsigned int off = 0;
 	unsigned int str = sizeof(Vertex);

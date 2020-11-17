@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 void Log(vec2 v);
+void Log(const char* v);
 
 class Utils
 {
