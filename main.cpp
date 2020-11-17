@@ -34,7 +34,7 @@ WinMain(
 	auto cubes = l.LoadOBJ("cube.obj", r);
 
 	std::string path("Assets\\Island\\Island.obj");
-	Model m(path.c_str());
+	Model m(path.c_str(), r);
 	Time::Init();
 
 	MSG Message = { 0 };

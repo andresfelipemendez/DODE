@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 
 
@@ -6,6 +7,7 @@
 struct Texture
 {
 	void* id;
+	std::string path;
 };
 
 struct vec3

@@ -2,8 +2,9 @@
 
 #include "Loader.h"
 
-Model::Model(const char* path)
+Model::Model(const char* path, Renderer& r)
 {
+	renderer = &r;
 	loadModel(path);
 }
 
@@ -21,6 +22,7 @@ void Model::loadModel(std::string path)
 		//error
 		return;
 	}
+	directory = path.substr(0, path.find_last_of('\\'));
 	processNode(scene->mRootNode, scene);
 }
 
@@ -84,6 +86,13 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	if(mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+
+		//for(int fooInt = 0; fooInt <= aiTextureType_UNKNOWN; fooInt++)
+		//{
+		//	aiTextureType type = std::static_cast<aiTextureType>(fooInt);
+		//	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		//	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+		//}
 		
 		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
@@ -101,7 +110,15 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		aiString str;
 		mat->GetTexture(type,i,&str);
 		Texture texture;
-		texture.id = Loader::load_image(str.C_Str());
+		std::string file(str.C_Str());
+		std::string textureFileName = file.substr(file.find_last_of('\\'), file.size() - 1);
+		textureFileName.pop_back();
+		std::string texturePath = directory + textureFileName;
+		
+		texture.id = Loader::load_image(texturePath, *renderer);
+		//texture.type =
+		texture.path = texturePath;
+		textures.push_back(texture);
 	}
 	return textures;
 }

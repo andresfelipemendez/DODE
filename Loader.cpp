@@ -159,7 +159,7 @@ std::vector<Mesh> Loader::LoadOBJ(std::string path, Renderer& r) const
 	return meshes;
 }
 
-void* Loader::load_image(const std::string path, Renderer& r) const
+void* Loader::load_image(const std::string path, Renderer& r) 
 {
 	int x,y,n;
 	auto* const data = stbi_load(path.c_str(), &x, &y, &n, 0);
@@ -171,10 +171,6 @@ void* Loader::load_image(const std::string path, Renderer& r) const
 	return r.create_texture_buffer(data,x,y,n);
 }
 
-void* Loader::load_image(const char* path)
-{
-	return nullptr;
-}
 
 /*
 FILE* file = fopen(path.c_str(), "r");

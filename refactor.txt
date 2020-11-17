@@ -1,0 +1,1 @@
+the texture data structure shouldn't include the path, I should create a dictionary with id and path insted
