@@ -9,22 +9,25 @@
 #include "Utils.h"
 
 int CALLBACK
-WinMain(HINSTANCE Instance,
-	HINSTANCE PrevInstance,
-	LPSTR CommandLine,
-	int ShowCode)
+WinMain(
+	_In_ HINSTANCE Instance,
+	_In_opt_  HINSTANCE PrevInstance,
+	_In_ LPSTR CommandLine,
+	_In_ int ShowCode)
 {
 	Renderer r;
-	Platform p;
+	Platform p{};
 	Loader l;
-	int width = 800;
-	int height = 600;
+	const auto width = 800;
+	const auto height = 600;
 
 	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
 	r.Initialize(p.WindowHandle, width, height);
 
-	auto texture = l.LoadImage("Assets\\Textures\\OutsSS04.png", r);
+	const auto texture = l.LoadImage("Assets\\Textures\\OutsSS04.png", r);
 	Mesh cube = l.LoadOBJ("cube.obj", r);
+
+	//Mesh island = l.LoadOBJ("Assets\\Island\\Island.obj", r);
 	
 	Time::Init();
 
@@ -37,7 +40,6 @@ WinMain(HINSTANCE Instance,
 		Input::Update();
 		
 		auto lt = Input::GetLeftThumb();
-		//auto rt = Input::get_right_thumb();
 		
 		r.CameraPosition(lt, Time::GetDeltaTime());
 		r.CameraRotation(Input::get_right_thumb(), Time::GetDeltaTime());

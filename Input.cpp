@@ -1,7 +1,7 @@
 #include "Input.h"
 
 #include <windows.h>
-#include <math.h>  
+
 
 static POINT point;
 
@@ -14,60 +14,30 @@ XINPUT_STATE Input::state;
 
 vec2 Input::GetLeftThumb() 
 {
-	vec2 left;
-	float LX = state.Gamepad.sThumbLX;
-	float LY = state.Gamepad.sThumbLY;
+	vec2 left {
+		state.Gamepad.sThumbLX,
+		state.Gamepad.sThumbLY
+	};
 
-	float magnitude = sqrt(LX * LX + LY * LY);
-
-	float normalizedLX = LX / magnitude;
-	float normalizedLY = LY / magnitude;
-
-	float normalizedMagnitude = 0;
-
-	if (magnitude > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+	left.normalize();
+	if (left.magnitude > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 	{
-		if (magnitude > 32767) magnitude = 32767;
-
-		magnitude -= XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE;
-
-		normalizedMagnitude = magnitude / (32767 - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
-
-		left.x = normalizedLX;
-		left.y = normalizedLY;
 		return left;
 	}
-	else
-	{
-		magnitude = 0.0;
-		normalizedMagnitude = 0.0;
-
-		return left;
-	}
+	left = {0,0};
+	return left;
 }
 
 vec2 Input::get_right_thumb()
 {
-	vec2 right;
-	right.x = state.Gamepad.sThumbRX;
-	right.y = state.Gamepad.sThumbRY;
-
-	auto magnitude = static_cast<float>(sqrt(
-		static_cast<double>(right.x) * static_cast<double>(right.x) +
-		static_cast<double>(right.y) * static_cast<double>(right.y)));
-	const auto normalized_lx = right.x / magnitude;
-	const auto normalized_ly = right.y / magnitude;
-
+	vec2 right {
+		state.Gamepad.sThumbRX,
+		state.Gamepad.sThumbRY
+	};
 	
-	if (magnitude > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+	right.normalize();
+	if (right.magnitude > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
 	{
-		if (magnitude > 32767) magnitude = 32767;
-
-		magnitude -= XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE;
-
-		
-		right.x = normalized_lx;
-		right.y = normalized_ly;
 		return right;
 	}
 	right = {0,0};

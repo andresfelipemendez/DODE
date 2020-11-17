@@ -53,6 +53,7 @@ Mesh ConvertVertexBuffer(std::vector<vec3>& vertices, std::vector<uint32_t>&vert
 
 Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 {
+	std::vector<Mesh> meshes;
 	Mesh m = Mesh();
 	std::vector<vec3> vertices;
 	std::vector<vec2> uvs;
@@ -63,15 +64,15 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 
 	std::string line;
 	std::ifstream myfile(path);
-	
-	obj_load_state state = obj_load_state::none;
+
+	auto state = obj_load_state::none;
 	if (myfile.is_open())
 	{
 		while (getline(myfile, line)) {
 			if (line[0] == 'v' && line[1] == ' ' ) {
 				if (state != obj_load_state::faces) {
 					vec3 v;
-					int res = sscanf(line.c_str(), " %*c %f %f %f\n", &v.x, &v.y, &v.z);
+					auto res = sscanf(line.c_str(), " %*c %f %f %f\n", &v.x, &v.y, &v.z);
 					vertices.push_back(v);
 					state = obj_load_state::vertices;
 				}
@@ -100,12 +101,12 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 			if (line[0] == 'f') 
 			{
 				unsigned int vIndex[3], uvIndex[3], nIndex[3];
-				if (state == obj_load_state::normals) 
+				if (state == obj_load_state::normals || state == obj_load_state::faces) 
 				{
-					int res = sscanf(line.c_str(), " %*c %u/%u/%u %u/%u/%u %u/%u/%u\n",
-						&vIndex[0], &uvIndex[0], &nIndex[0],
-						&vIndex[1], &uvIndex[1], &nIndex[1],
-						&vIndex[2], &uvIndex[2], &nIndex[2]);
+					auto res = sscanf(line.c_str(), " %*c %u/%u/%u %u/%u/%u %u/%u/%u\n",
+					                  &vIndex[0], &uvIndex[0], &nIndex[0],
+					                  &vIndex[1], &uvIndex[1], &nIndex[1],
+					                  &vIndex[2], &uvIndex[2], &nIndex[2]);
 					vertexIndices.push_back(vIndex[0] - 1);
 					vertexIndices.push_back(vIndex[1] - 1);
 					vertexIndices.push_back(vIndex[2] - 1);
@@ -118,10 +119,10 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 				}
 				else
 				{
-					int res = sscanf(line.c_str(), " %*c %u/%u %u/%u %u/%u\n",
-						&vIndex[0], &uvIndex[0], 
-						&vIndex[1], &uvIndex[1],
-						&vIndex[2], &uvIndex[2]);
+					auto res = sscanf(line.c_str(), " %*c %u/%u %u/%u %u/%u\n",
+					                  &vIndex[0], &uvIndex[0], 
+					                  &vIndex[1], &uvIndex[1],
+					                  &vIndex[2], &uvIndex[2]);
 					vertexIndices.push_back(vIndex[0] - 1);
 					vertexIndices.push_back(vIndex[1] - 1);
 					vertexIndices.push_back(vIndex[2] - 1);
@@ -130,7 +131,7 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 					uvIndices.push_back(uvIndex[2] - 1);
 				}
 
-				//state = OBJLoadState::Faces;
+				state = obj_load_state::faces;
 			}
 		}
 	}

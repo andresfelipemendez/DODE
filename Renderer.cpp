@@ -346,8 +346,8 @@ void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, 
 
 void Renderer::CameraPosition(const vec2& lt, double get_delta_time)
 {
-	camera_pos_.x += lt.x * get_delta_time;
-	camera_pos_.z += lt.y * get_delta_time;
+	camera_pos_.x += lt.x * get_delta_time * 4;
+	camera_pos_.z += lt.y * get_delta_time * 4;
 }
 
 void Renderer::CalculateMatrix(vec3 p) {
