@@ -40,21 +40,22 @@ Mesh ConvertVertexBuffer(std::vector<vec3>& vertices, std::vector<uint32_t>&vert
 
 	for (size_t i = 0; i < vertexIndices.size(); ++i)
 	{
+		auto vi = vertexIndices[i];
+		auto ui = uvIndices[i];
 		vertexBuffer[vertexIndices[i]].uv[0] = uvs[uvIndices[i]].x;
 		vertexBuffer[vertexIndices[i]].uv[1] = uvs[uvIndices[i]].y;
 		
 		/*vertexBuffer[vertexIndices[i]].normal[0] = normals[normalIndices[i]].x;
 		vertexBuffer[vertexIndices[i]].normal[1] = normals[normalIndices[i]].y;
 		vertexBuffer[vertexIndices[i]].normal[2] = normals[normalIndices[i]].z;*/
-		
 	}
 	return SendToGPU(vertexBuffer, vertexIndices, r);
 }
 
-Mesh Loader::LoadOBJ(std::string path, Renderer& r)
+std::vector<Mesh> Loader::LoadOBJ(std::string path, Renderer& r) const
 {
 	std::vector<Mesh> meshes;
-	Mesh m = Mesh();
+	
 	std::vector<vec3> vertices;
 	std::vector<vec2> uvs;
 	std::vector<vec3> normals;
@@ -70,16 +71,32 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 	{
 		while (getline(myfile, line)) {
 			if (line[0] == 'v' && line[1] == ' ' ) {
-				if (state != obj_load_state::faces) {
-					vec3 v;
-					auto res = sscanf(line.c_str(), " %*c %f %f %f\n", &v.x, &v.y, &v.z);
+				vec3 v;
+				auto res = sscanf(line.c_str(), " %*c %f %f %f\n", &v.x, &v.y, &v.z);
+				
+				/*if (state != obj_load_state::faces) 
+				{
 					vertices.push_back(v);
 					state = obj_load_state::vertices;
 				}
-				/*else if(state == OBJLoadState::Faces)
+				else*/
+				
+				if(state == obj_load_state::faces)
 				{
-					return ConvertVertexBuffer(vertices, vertexIndices, uvs, uvIndices, r);
-				}*/
+					auto m = ConvertVertexBuffer(vertices, vertexIndices, uvs, uvIndices, r);
+					meshes.push_back(m);
+
+					vertices.clear();
+					uvs.clear();
+					normals.clear();
+					vertexIndices.clear();
+					uvIndices.clear();
+					normalIndices.clear();
+				}
+				
+				vertices.push_back(v);
+				state = obj_load_state::vertices;
+				
 			}
 
 			if (line[0] == 'v' && line[1] == 't')
@@ -136,10 +153,13 @@ Mesh Loader::LoadOBJ(std::string path, Renderer& r)
 		}
 	}
 
-	return ConvertVertexBuffer(vertices, vertexIndices, uvs, uvIndices, r);
+	auto m = ConvertVertexBuffer(vertices, vertexIndices, uvs, uvIndices, r);
+	meshes.push_back(m);
+	
+	return meshes;
 }
 
-void* Loader::LoadImage(const std::string path, Renderer& r) const
+void* Loader::load_image(const std::string path, Renderer& r) const
 {
 	int x,y,n;
 	auto* const data = stbi_load(path.c_str(), &x, &y, &n, 0);
@@ -149,6 +169,11 @@ void* Loader::LoadImage(const std::string path, Renderer& r) const
 	}
 
 	return r.create_texture_buffer(data,x,y,n);
+}
+
+void* Loader::load_image(const char* path)
+{
+	return nullptr;
 }
 
 /*

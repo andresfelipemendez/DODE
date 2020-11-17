@@ -1,12 +1,18 @@
+
+#define NOMINMAX
 #include <windows.h>
+
 #include "Platform.h"
 #include "Renderer.h"
 
 #include "Loader.h"
 #include "Time.h"
 #include "Input.h"
+#include "Model.h"
 
 #include "Utils.h"
+
+
 
 int CALLBACK
 WinMain(
@@ -24,15 +30,16 @@ WinMain(
 	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
 	r.Initialize(p.WindowHandle, width, height);
 
-	const auto texture = l.LoadImage("Assets\\Textures\\OutsSS04.png", r);
-	Mesh cube = l.LoadOBJ("cube.obj", r);
+	const auto texture = l.load_image("Assets\\Textures\\OutsSS04.png", r);
+	auto cubes = l.LoadOBJ("cube.obj", r);
 
-	//Mesh island = l.LoadOBJ("Assets\\Island\\Island.obj", r);
-	
+	std::string path("Assets\\Island\\Island.obj");
+	Model m(path.c_str());
 	Time::Init();
 
 	MSG Message = { 0 };
 
+	auto cube = cubes[0];
 	
 	while (true)
 	{

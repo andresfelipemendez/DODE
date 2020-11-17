@@ -1,4 +1,13 @@
 #pragma once
+#include <vector>
+
+
+
+struct Texture
+{
+	void* id;
+};
+
 struct vec3
 {
 	float x = 0, y = 0, z = 0;
@@ -15,8 +24,12 @@ struct Vertex {
 	float normal[3];
 	float uv[2];
 };
+
 struct Mesh {
 	void* indexBuffer;
 	void* vertexBuffer;
 	size_t numIndices;
 };
+
+Mesh CreateMesh(const std::vector<Vertex>& vector, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
+	

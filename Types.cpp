@@ -10,3 +10,10 @@ void vec2::normalize()
 	x = x / magnitude;
 	y = y / magnitude;
 }
+
+Mesh CreateMesh(const std::vector<Vertex>& vector, const std::vector<unsigned>& indices,
+	const std::vector<Texture>& textures)
+{
+	Mesh m {};
+	return m;
+}

@@ -2,13 +2,16 @@
 
 #include "Types.h"
 #include <string>
+#include <vector>
+
 #include "Renderer.h"
 
 class Loader
 {
 public:
-	Mesh LoadOBJ(std::string path, Renderer& r);
+	std::vector<Mesh> LoadOBJ(std::string path, Renderer& r) const;
 	
-	void* LoadImage(std::string path, Renderer& r) const;
+	void* load_image(std::string path, Renderer& r) const;
+	static void* load_image(const char* path);
 };
 
