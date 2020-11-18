@@ -22,7 +22,7 @@ public:
 	void SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer, void* texture);
 	void CameraPosition(const vec2& lt, double get_delta_time);
 private:
-	vec3 camera_pos_;
+	vec3 camera_pos_ {0,5,-20};
 	vec3 rot_;
 	vec3 look_at_;
 	

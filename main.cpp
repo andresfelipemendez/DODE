@@ -31,16 +31,16 @@ WinMain(
 	r.Initialize(p.WindowHandle, width, height);
 
 	const auto texture = l.load_image("Assets\\Textures\\OutsSS04.png", r);
-	auto cubes = l.LoadOBJ("cube.obj", r);
+	
+	//std::string path("Assets\\Island\\Island.obj");
+	//Model m(path.c_str(), r);
 
-	std::string path("Assets\\Island\\Island.obj");
-	Model m(path.c_str(), r);
+	Model cb("cube.obj", r);
+	
 	Time::Init();
 
 	MSG Message = { 0 };
 
-	auto cube = cubes[0];
-	
 	while (true)
 	{
 		Time::Tick();
@@ -63,9 +63,8 @@ WinMain(
 
 		r.Clear();
 
-		vec3 pos = { 0, 5, -20.0f };
-		r.SetBuffers(pos, cube.numIndices, cube.indexBuffer, cube.vertexBuffer, texture);
-
+		cb.Draw();
+		
 		r.Render();
 	}
 }

@@ -3,6 +3,7 @@
 #include <vector>
 
 
+class Renderer;
 
 struct Texture
 {
@@ -30,8 +31,10 @@ struct Vertex {
 struct Mesh {
 	void* indexBuffer;
 	void* vertexBuffer;
+	Texture texture;
 	size_t numIndices;
+	void Draw(Renderer* renderer) const;
 };
 
-Mesh CreateMesh(const std::vector<Vertex>& vector, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
+Mesh CreateMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, Renderer* renderer);
 	

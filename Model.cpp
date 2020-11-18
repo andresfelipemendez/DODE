@@ -10,6 +10,10 @@ Model::Model(const char* path, Renderer& r)
 
 void Model::Draw()
 {
+	for(const auto& mesh : meshes)
+	{
+		mesh.Draw(renderer);
+	}
 }
 
 void Model::loadModel(std::string path)
@@ -71,14 +75,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			vertex.normal[2] = mesh->mNormals[i].z;
 		}
 		
-		
 		//mesh->m
 		vertices.push_back(vertex);
 	}
 
 	for(unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
-		//aiFace face = mesh->mFaces[i];
 		for(unsigned int j = 0; j < mesh->mFaces[i].mNumIndices; j++)
 			indices.push_back(mesh->mFaces[i].mIndices[j]);
 	}
@@ -87,19 +89,12 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-		//for(int fooInt = 0; fooInt <= aiTextureType_UNKNOWN; fooInt++)
-		//{
-		//	aiTextureType type = std::static_cast<aiTextureType>(fooInt);
-		//	std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-		//	textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-		//}
-		
 		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
-	return CreateMesh(vertices,indices,textures);
+	return CreateMesh(vertices,indices,textures,renderer);
 }
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)

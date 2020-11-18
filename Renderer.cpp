@@ -153,24 +153,6 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	d3dctx->PSSetShader( pPS, 0, 0);
 	d3dctx->PSSetSamplers( 0, 1, &m_sampleState);
 
-	//D3DX11_IMAGE_LOAD_INFO dili = { 0 };
-
-	//dili.Width = 341;
-	//dili.Height = 125;
-	//dili.Depth = D3DX11_DEFAULT;
-	//dili.FirstMipLevel = D3DX11_DEFAULT;
-	//dili.MipLevels = D3DX11_DEFAULT;
-	//dili.Usage = (D3D11_USAGE)D3DX11_DEFAULT;
-	//dili.BindFlags = D3DX11_DEFAULT;
-	//dili.CpuAccessFlags = D3DX11_DEFAULT;
-	//dili.MiscFlags = D3DX11_DEFAULT;
-	//dili.Format = DXGI_FORMAT_FROM_FILE;
-	//dili.Filter = D3DX11_DEFAULT;
-	//dili.MipFilter = D3DX11_DEFAULT;
-	//dili.pSrcInfo = NULL;
-
-	//hr = D3DX11CreateShaderResourceViewFromFile(d3ddev, L"awdli-om21s.dds", &dili, NULL, &m_texture, NULL);
-	
 	float fieldOfView = DirectX::XM_PI / 4.0f;
 	float screenAspect = (float)800 / (float)600;
 
@@ -289,7 +271,7 @@ void* Renderer::create_texture_buffer(const unsigned char* data,int x,int y,int 
 		0,
 		NULL,
 		data,
-		(x * 4) * sizeof(unsigned char),
+		(x * n) * sizeof(unsigned char),
 		0
 	);
 

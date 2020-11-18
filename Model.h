@@ -17,8 +17,10 @@ class Model
 public:
 	explicit Model(const char* path, Renderer& r);
 	void Draw();
-private:
+	
 	std::vector<Mesh> meshes;
+private:
+	
 	std::string directory;
 	Renderer* renderer;
 
