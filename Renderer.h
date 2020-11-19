@@ -19,7 +19,7 @@ public:
 	void* CreateVertexBuffer(Vertex* vertices, size_t size);
 	void* CreateIndexBuffer(unsigned int* indices, unsigned int size);
 	void* create_texture_buffer(const unsigned char *data,int x,int y,int n) const;
-	void SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer, void* texture);
+	void SetBuffers(Transform t, unsigned int numIndices, void* indexBuffer, void* vertexBuffer, void* texture);
 	void CameraPosition(const vec2& lt, double get_delta_time);
 
 	ID3D11Device* d3ddev;
@@ -56,6 +56,6 @@ private:
 
 	unsigned int bufferNumber;
 
-	void CalculateMatrix(vec3 position);
+	void CalculateMatrix(Transform t);
 };
 

@@ -16,7 +16,7 @@ class Model
 {
 public:
 	explicit Model(const char* path, Renderer& r);
-	void Draw();
+	void Draw(Transform t);
 	
 	std::vector<Mesh> meshes;
 private:

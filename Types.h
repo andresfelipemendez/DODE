@@ -16,6 +16,13 @@ struct vec3
 	float x = 0, y = 0, z = 0;
 };
 
+struct Transform
+{
+	vec3 translate;
+	vec3 rotate;
+	vec3 scale;
+};
+
 struct vec2
 {
 	float x = 0, y = 0;
@@ -34,7 +41,7 @@ struct Mesh {
 	void* vertexBuffer;
 	Texture texture;
 	size_t numIndices;
-	void Draw(Renderer* renderer) const;
+	void Draw(Renderer* renderer, Transform t) const;
 };
 
 Mesh CreateMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures, Renderer* renderer);

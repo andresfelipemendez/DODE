@@ -8,11 +8,11 @@ Model::Model(const char* path, Renderer& r)
 	loadModel(path);
 }
 
-void Model::Draw()
+void Model::Draw(Transform t)
 {
 	for(const auto& mesh : meshes)
 	{
-		mesh.Draw(renderer);
+		mesh.Draw(renderer, t);
 	}
 }
 
@@ -106,8 +106,11 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		mat->GetTexture(type,i,&str);
 		Texture texture;
 		std::string file(str.C_Str());
-		std::string textureFileName = file.substr(file.find_last_of('\\'), file.size() - 1);
-		textureFileName.pop_back();
+
+		
+		
+		std::string textureFileName = "\\"+file;//.substr(file.find_last_of('\\'), file.size() - 1);
+		//textureFileName.pop_back();
 		std::string texturePath = directory + textureFileName;
 		
 		texture.id = Loader::load_image(texturePath, *renderer);

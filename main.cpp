@@ -37,8 +37,14 @@ WinMain(
 
 	ImGui_ImplWin32_Init(p.WindowHandle);
 	ImGui_ImplDX11_Init(r.d3ddev, r.d3dctx);
+
+	Transform t;
+	t.translate=  {0,0,0};
+	t.rotate = {0,0,0};
 	
-	Model cb("cube.obj", r);
+	t.scale = {1,1,1};
+	Model cb("Assets\\Link\\link.obj", r);
+	//Model cb("cube.obj", r);
 	
 	Time::Init();
 
@@ -71,7 +77,7 @@ WinMain(
 		
 		r.Clear();
 
-		cb.Draw();
+		cb.Draw(t);
 		
 		
 		if (show_demo_window)
@@ -81,6 +87,9 @@ WinMain(
 		ImGui::Text("This is some useful text.");
 		ImGui::InputFloat2("Left Thumb",&Input::leftThumb.x);
 		ImGui::InputFloat3("Camera pos",&r.camera_pos_.x);
+		ImGui::DragFloat3("translation",&t.translate.x);
+		ImGui::DragFloat3("rotation",&t.rotate.x,0.01f);
+		ImGui::DragFloat3("scale",&t.scale.x,0.01f);
 		
 		ImGui::End();
 
