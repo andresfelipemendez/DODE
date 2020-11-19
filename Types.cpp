@@ -6,12 +6,18 @@
 
 void vec2::normalize()
 {
-	magnitude = static_cast<float>(sqrt(
-		static_cast<double>(x) * static_cast<double>(x) +
-		static_cast<double>(y) * static_cast<double>(y)));
+	const auto magnitude = GetMagnitude();
 	x = x / magnitude;
 	y = y / magnitude;
 }
+
+float vec2::GetMagnitude() const
+{
+	return static_cast<float>(sqrt(
+		static_cast<double>(x) * static_cast<double>(x) +
+		static_cast<double>(y) * static_cast<double>(y)));
+}
+
 
 void Mesh::Draw(Renderer* renderer) const
 {

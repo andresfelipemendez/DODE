@@ -6,6 +6,9 @@
 #include <d3dcompiler.h>
 #include <directxmath.h>
 
+
+#include "imgui.h"
+
 struct MatrixBufferType
 {
 	DirectX::XMMATRIX world;
@@ -156,8 +159,7 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	float fieldOfView = DirectX::XM_PI / 4.0f;
 	float screenAspect = (float)800 / (float)600;
 
-	projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.03f, 100.0f);
-	
+	projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.03f, 10000.0f);	
 	projectionMatrix = DirectX::XMMatrixTranspose(projectionMatrix);
 
 	D3D11_BUFFER_DESC matrixBufferDesc;
@@ -169,24 +171,31 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	matrixBufferDesc.StructureByteStride = 0;
 	HRESULT result = d3ddev->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
 
-	worldMatrix = DirectX::XMMatrixIdentity();
-	
-	worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+	//worldMatrix = DirectX::XMMatrixIdentity();
+	//worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
 }
 
 void Renderer::Clear() {
 	float color[4] = { 0.0f, 0.5f, 0.5f, 1.0f };
 	d3dctx->ClearRenderTargetView(view, color);
+
+	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(camera_rot_.x,camera_rot_.y,camera_rot_.z);
+	
+	auto translation = DirectX::XMMatrixTranslation(camera_pos_.x,camera_pos_.y,camera_pos_.z);
+
+	viewMatrix = DirectX::XMMatrixMultiply(rotm,translation);
+	viewMatrix = DirectX::XMMatrixInverse(nullptr,viewMatrix);
+	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
 }
 
-void Renderer::Render() {
+void Renderer::Present() {
 	HRESULT res = sc->Present(0, 0);
 }
 
-void Renderer::CameraRotation(vec2 dir, double deltaTime)
+void Renderer::CameraRotation(const vec2& dir, double deltaTime)
 {
-	look_at_.x += dir.x * deltaTime;
-	look_at_.y += dir.y * deltaTime;
+	camera_rot_.x += -dir.y * deltaTime;
+	camera_rot_.y += dir.x * deltaTime;
 }
 
 void* Renderer::CreateVertexBuffer(Vertex* vertices, size_t size)
@@ -328,13 +337,37 @@ void Renderer::SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, 
 
 void Renderer::CameraPosition(const vec2& lt, double get_delta_time)
 {
-	camera_pos_.x += lt.x * get_delta_time * 4;
-	camera_pos_.z += lt.y * get_delta_time * 4;
+	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(camera_rot_.x,camera_rot_.y,camera_rot_.z);
+	
+	DirectX::XMVECTOR cpos = DirectX::XMVectorSet(lt.x,0,lt.y,0);
+	
+	cpos = DirectX::XMVector3TransformNormal(cpos,rotm);
+	
+	camera_pos_.x += DirectX::XMVectorGetX(cpos) * get_delta_time * 4;
+	camera_pos_.y += DirectX::XMVectorGetY(cpos) * get_delta_time * 4;
+	camera_pos_.z += DirectX::XMVectorGetZ(cpos) * get_delta_time * 4;
 }
 
 void Renderer::CalculateMatrix(vec3 p) {
-	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(rot_.z, rot_.y, rot_.x);
+	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(0,0,0);
+
+	/*
+	DirectX::XMVECTOR pos = DirectX::XMVectorSet(p.x, p.y, p.z, 0);
+	*/
+
+	worldMatrix = DirectX::XMMatrixTranslation(0,0,0);
+	worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
 	
+	auto r = worldMatrix;
+	ImGui::InputFloat4("nah",r.r[0].m128_f32);
+	ImGui::InputFloat4("nah",r.r[1].m128_f32);
+	ImGui::InputFloat4("nah",r.r[2].m128_f32);
+	ImGui::InputFloat4("nah",r.r[3].m128_f32);
+}
+
+/*
+ * DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(-camera_rot_.y, camera_rot_.x, camera_rot_.z);
+
 	DirectX::XMVECTOR lookAt = DirectX::XMVectorSet(look_at_.x, look_at_.y,1.0f,0);
 	lookAt = DirectX::XMVector3TransformCoord(lookAt, rotm);
 
@@ -348,4 +381,4 @@ void Renderer::CalculateMatrix(vec3 p) {
 
 	viewMatrix = DirectX::XMMatrixLookAtLH(pos, lookAt, up);
 	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
-}
+ */

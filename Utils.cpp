@@ -1,10 +1,9 @@
 #include "Utils.h"
 
 void Log(vec2 v) {
-	std::string s;
-	s += std::to_string(v.x) + " ";
-	s += std::to_string(v.y) + "\n";
-	OutputDebugStringA(s.c_str());
+	char s[30];
+	sprintf(s,"vec2: %f, %f",v.x,v.y);
+	OutputDebugStringA(s);
 }
 
 void Log(const char* v)

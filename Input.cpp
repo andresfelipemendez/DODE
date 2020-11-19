@@ -2,47 +2,48 @@
 
 #include <windows.h>
 
+#include "imgui_impl_win32.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 static POINT point;
+
+vec2 Input::leftThumb;
+vec2 Input::rightThumb;
 
 void Input::Update() {
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 	XInputGetState(0, &state);
+
+	leftThumb = {
+		static_cast<float>(state.Gamepad.sThumbLX),
+		static_cast<float>(state.Gamepad.sThumbLY)
+	};
+
+	if (leftThumb.GetMagnitude() > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+	{
+		leftThumb.normalize();
+	}
+	else
+	{
+		leftThumb = {0,0};	
+	}
+	
+	rightThumb = {
+		static_cast<float>(state.Gamepad.sThumbRX),
+		static_cast<float>(state.Gamepad.sThumbRY)
+	};
+
+	if (rightThumb.GetMagnitude() > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+	{
+		rightThumb.normalize();
+	}
+	else
+	{
+		rightThumb = {0,0};
+	}
 }
 
 XINPUT_STATE Input::state;
-
-vec2 Input::GetLeftThumb() 
-{
-	vec2 left {
-		state.Gamepad.sThumbLX,
-		state.Gamepad.sThumbLY
-	};
-
-	left.normalize();
-	if (left.magnitude > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
-	{
-		return left;
-	}
-	left = {0,0};
-	return left;
-}
-
-vec2 Input::get_right_thumb()
-{
-	vec2 right {
-		state.Gamepad.sThumbRX,
-		state.Gamepad.sThumbRY
-	};
-	
-	right.normalize();
-	if (right.magnitude > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
-	{
-		return right;
-	}
-	right = {0,0};
-	return right;
-}
 
 LRESULT CALLBACK
 Win32MainWindowCallback(HWND Window,
@@ -56,6 +57,9 @@ Win32MainWindowCallback(HWND Window,
 	point.x -= rect.left;
 	point.y -= rect.top;
 	LRESULT Result = 0;
+
+	if (ImGui_ImplWin32_WndProcHandler(Window, Message, WParam, LParam))
+		return true;
 	switch (Message)
 	{
 

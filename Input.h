@@ -1,9 +1,8 @@
 #pragma once
 #include "Types.h"
 
-
 #include <Windows.h>
-#include "xinput.h"
+#include "Xinput.h"
 
 LRESULT CALLBACK
 Win32MainWindowCallback(HWND Window,
@@ -15,11 +14,10 @@ class Input
 {
 public:
 	static void Update();
-	static vec2 GetLeftThumb();
-	static vec2 get_right_thumb();
 	
+	static vec2 leftThumb;
+	static vec2 rightThumb;
 private :
 	static XINPUT_STATE state;
-	//DWORD dwResult;
 };
 

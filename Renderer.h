@@ -13,21 +13,25 @@ class Renderer
 public:
 	void Initialize(HWND WindowHandle, int SCREEN_WIDTH, int SCREEN_HEIGHT);
 	void Clear();
-	void Render();
+	void Present();
 
-	void CameraRotation(vec2 dir, double deltaTime);
+	void CameraRotation(const vec2& dir, double deltaTime);
 	void* CreateVertexBuffer(Vertex* vertices, size_t size);
 	void* CreateIndexBuffer(unsigned int* indices, unsigned int size);
 	void* create_texture_buffer(const unsigned char *data,int x,int y,int n) const;
 	void SetBuffers(vec3 pos, unsigned int numIndices, void* indexBuffer, void* vertexBuffer, void* texture);
 	void CameraPosition(const vec2& lt, double get_delta_time);
-private:
-	vec3 camera_pos_ {0,5,-20};
-	vec3 rot_;
-	vec3 look_at_;
-	
+
 	ID3D11Device* d3ddev;
 	ID3D11DeviceContext* d3dctx;
+
+	vec3 camera_pos_ {0,0,-20};
+private:
+	
+	vec3 camera_rot_ {0,0,0};
+	vec3 look_at_ {0,0,0};
+	
+	
 	IDXGISwapChain* sc;
 
 	ID3D11Texture2D* d3dbb;

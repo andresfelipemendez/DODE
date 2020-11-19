@@ -1,6 +1,9 @@
-
 #define NOMINMAX
-#include <windows.h>
+#include <Windows.h>
+
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx11.h"
 
 #include "Platform.h"
 #include "Renderer.h"
@@ -9,10 +12,7 @@
 #include "Time.h"
 #include "Input.h"
 #include "Model.h"
-
 #include "Utils.h"
-
-
 
 int CALLBACK
 WinMain(
@@ -30,26 +30,34 @@ WinMain(
 	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
 	r.Initialize(p.WindowHandle, width, height);
 
-	const auto texture = l.load_image("Assets\\Textures\\OutsSS04.png", r);
-	
-	//std::string path("Assets\\Island\\Island.obj");
-	//Model m(path.c_str(), r);
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGui::StyleColorsDark();
 
+	ImGui_ImplWin32_Init(p.WindowHandle);
+	ImGui_ImplDX11_Init(r.d3ddev, r.d3dctx);
+	
 	Model cb("cube.obj", r);
 	
 	Time::Init();
 
 	MSG Message = { 0 };
 
+	 bool show_demo_window = false;
+	
 	while (true)
 	{
+		ImGui_ImplDX11_NewFrame();
+		ImGui_ImplWin32_NewFrame();
+		ImGui::NewFrame();
+
+		
 		Time::Tick();
 		Input::Update();
 		
-		auto lt = Input::GetLeftThumb();
-		
-		r.CameraPosition(lt, Time::GetDeltaTime());
-		r.CameraRotation(Input::get_right_thumb(), Time::GetDeltaTime());
+		r.CameraPosition(Input::leftThumb, Time::GetDeltaTime());
+		r.CameraRotation(Input::rightThumb, Time::GetDeltaTime());
 
 		if (PeekMessage(&Message, 0, 0, 0, PM_REMOVE) > 0)
 		{
@@ -60,11 +68,29 @@ WinMain(
 				break;
 			}
 		}
-
+		
 		r.Clear();
 
 		cb.Draw();
 		
-		r.Render();
+		
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
+		
+		ImGui::Begin("Hello, world!");
+		ImGui::Text("This is some useful text.");
+		ImGui::InputFloat2("Left Thumb",&Input::leftThumb.x);
+		ImGui::InputFloat3("Camera pos",&r.camera_pos_.x);
+		
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+		
+		r.Present();
 	}
+
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 }

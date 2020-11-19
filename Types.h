@@ -18,8 +18,9 @@ struct vec3
 
 struct vec2
 {
-	float x = 0, y = 0, magnitude = 0;
+	float x = 0, y = 0;
 	void normalize();
+	float GetMagnitude() const;
 };
 
 struct Vertex {
