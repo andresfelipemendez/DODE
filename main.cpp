@@ -33,16 +33,19 @@ WinMain(
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplWin32_Init(p.WindowHandle);
 	ImGui_ImplDX11_Init(r.d3ddev, r.d3dctx);
 
 	Transform t;
-	t.translate=  {0,0,0};
-	t.rotate = {0,0,0};
+	t.translate=  {0,-3.0f,0};
+	t.rotate = {0,3.14f,0};
 	
-	t.scale = {1,1,1};
+	t.scale = {0.05f,0.05f,0.05f};
 	Model cb("Assets\\Link\\link.obj", r);
 	//Model cb("cube.obj", r);
 	
@@ -77,9 +80,6 @@ WinMain(
 		
 		r.Clear();
 
-		cb.Draw(t);
-		
-		
 		if (show_demo_window)
 			ImGui::ShowDemoWindow(&show_demo_window);
 		
@@ -94,7 +94,16 @@ WinMain(
 		ImGui::End();
 
 		ImGui::Render();
+		r.viewport();
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+		cb.Draw(t);
+		
+		 if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+		}
 		
 		r.Present();
 	}

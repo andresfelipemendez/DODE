@@ -11,26 +11,29 @@ struct MatrixBufferType;
 class Renderer
 {
 public:
+	static void CheckError(HRESULT hr, ID3D10Blob* msg);
 	void Initialize(HWND WindowHandle, int SCREEN_WIDTH, int SCREEN_HEIGHT);
 	void Clear();
 	void Present();
 
-	void CameraRotation(const vec2& dir, double deltaTime);
+	void viewport();
+	
 	void* CreateVertexBuffer(Vertex* vertices, size_t size);
 	void* CreateIndexBuffer(unsigned int* indices, unsigned int size);
 	void* create_texture_buffer(const unsigned char *data,int x,int y,int n) const;
 	void SetBuffers(Transform t, unsigned int numIndices, void* indexBuffer, void* vertexBuffer, void* texture);
+	
+	void CameraRotation(const vec2& dir, double deltaTime);
 	void CameraPosition(const vec2& lt, double get_delta_time);
 
 	ID3D11Device* d3ddev;
 	ID3D11DeviceContext* d3dctx;
 
-	vec3 camera_pos_ {0,0,-20};
+	vec3 camera_pos_ {0,0,-8};
 private:
 	
 	vec3 camera_rot_ {0,0,0};
 	vec3 look_at_ {0,0,0};
-	
 	
 	IDXGISwapChain* sc;
 

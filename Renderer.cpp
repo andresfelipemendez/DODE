@@ -4,7 +4,7 @@
 
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include <directxmath.h>
+#include <DirectXMath.h>
 
 
 #include "imgui.h"
@@ -15,6 +15,18 @@ struct MatrixBufferType
 	DirectX::XMMATRIX view;
 	DirectX::XMMATRIX projection;
 };
+
+void Renderer::CheckError(HRESULT hr, ID3D10Blob* msg)
+{
+	if (FAILED(hr))
+	{
+		if (msg)
+		{
+			OutputDebugStringA(static_cast<char*>(msg->GetBufferPointer()));
+			msg->Release();
+		}
+	}
+}
 
 void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 {
@@ -33,13 +45,6 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	adapter->EnumOutputs(0, &output);
 	output->GetDesc(&od);
 	output->Release();
-
-	if (FAILED(hr)) {
-		if (hr == E_INVALIDARG) {
-			int i = 0;
-		}
-		int i = 0;
-	}
 	
 	DXGI_SWAP_CHAIN_DESC scd;
 	ZeroMemory(&scd, sizeof(DXGI_SWAP_CHAIN_DESC));
@@ -51,14 +56,14 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	scd.SampleDesc.Count = 4;
 	scd.Windowed = TRUE;
 	scd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-	
-	D3D_FEATURE_LEVEL FeatureLevelsRequested = D3D_FEATURE_LEVEL_11_0;
+
+	auto FeatureLevelsRequested = D3D_FEATURE_LEVEL_11_0;
 	UINT numLevelsRequested = 1;
 
 	hr = D3D11CreateDeviceAndSwapChain(
-		NULL,						//	pAdapter
+		nullptr,						//	pAdapter
 		D3D_DRIVER_TYPE_HARDWARE,	//	DriverType
-		NULL,						//	Software
+		nullptr,						//	Software
 		NULL,						//	Flags
 		&FeatureLevelsRequested,	//	pFeatureLevels
 		1,							//  FeatureLevels
@@ -66,19 +71,8 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 		&scd,						//	pSwapChainDesc
 		&sc,						//	ppSwapChain
 		&d3ddev,					//	ppDevice
-		NULL,						//	pFeatureLevel
+		nullptr,						//	pFeatureLevel
 		&d3dctx);					//	ppImmediateContext
-
-	if (FAILED(hr)) {
-		if (hr == E_INVALIDARG) {
-			int i = 0;
-		}
-		else if (hr == DXGI_ERROR_INVALID_CALL)
-		{
-			int i = 0;
-		}
-		int i = 0;
-	}
 
 	hr = sc->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&d3dbb);
 
@@ -87,7 +81,13 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	vd.Format = DXGI_FORMAT_UNKNOWN;
 	vd.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	vd.Texture2D.MipSlice = 0;
-	hr = d3ddev->CreateRenderTargetView(d3dbb, NULL, &view);
+	if(d3dbb){
+		hr = d3ddev->CreateRenderTargetView(d3dbb, NULL, &view);
+	}
+	else
+	{
+		
+	}
 
 	d3dctx->OMSetRenderTargets(1, &view, NULL);
 	vp.Width = SCREEN_WIDTH;
@@ -100,28 +100,12 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 
 	
 	ID3D10Blob* VS, * PS;
-	ID3D10Blob* msg = NULL;
+	ID3D10Blob* msg = nullptr;
 	hr = D3DCompileFromFile(L"Shader.shader", 0, 0, "VShader", "vs_4_0", 0, 0, &VS, &msg);
-
-	if (FAILED(hr))
-	{
-		if (msg)
-		{
-			OutputDebugStringA((char*)msg->GetBufferPointer());
-			msg->Release();
-		}
-	}
+	CheckError(hr, msg);
 
 	hr = D3DCompileFromFile(L"Shader.shader", 0, 0, "PShader", "ps_4_0", 0, 0, &PS, &msg);
-
-	if (FAILED(hr))
-	{
-		if (msg)
-		{
-			OutputDebugStringA(static_cast<char*>(msg->GetBufferPointer()));
-			msg->Release();
-		}
-	}
+	CheckError(hr, msg);
 
 	hr = d3ddev->CreateVertexShader( VS->GetBufferPointer(), VS->GetBufferSize(), NULL, &pVS);
 	d3ddev->CreatePixelShader(PS->GetBufferPointer(), PS->GetBufferSize(), NULL, &pPS);
@@ -156,8 +140,8 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	d3dctx->PSSetShader( pPS, 0, 0);
 	d3dctx->PSSetSamplers( 0, 1, &m_sampleState);
 
-	float fieldOfView = DirectX::XM_PI / 4.0f;
-	float screenAspect = (float)800 / (float)600;
+	auto fieldOfView = DirectX::XM_PI / 4.0f;
+	auto screenAspect = 800.0f / 600.0f;
 
 	projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.03f, 10000.0f);	
 	projectionMatrix = DirectX::XMMatrixTranspose(projectionMatrix);
@@ -169,7 +153,7 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	matrixBufferDesc.MiscFlags = 0;
 	matrixBufferDesc.StructureByteStride = 0;
-	HRESULT result = d3ddev->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
+	auto result = d3ddev->CreateBuffer(&matrixBufferDesc, nullptr, &m_matrixBuffer);
 }
 
 void Renderer::Clear() {
@@ -187,6 +171,13 @@ void Renderer::Clear() {
 
 void Renderer::Present() {
 	HRESULT res = sc->Present(0, 0);
+}
+
+void Renderer::viewport()
+{
+	float color[4] = { 0.0f, 0.5f, 0.5f, 1.0f };
+	d3dctx->OMSetRenderTargets(1, &view, NULL);
+	d3dctx->ClearRenderTargetView(view, color);
 }
 
 void Renderer::CameraRotation(const vec2& dir, double deltaTime)
@@ -347,8 +338,6 @@ void Renderer::CameraPosition(const vec2& lt, double get_delta_time)
 
 void Renderer::CalculateMatrix(Transform t)
 {
-	//DirectX::XMMATRIX rotm = 
-	
 	DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(t.scale.x,t.scale.y,t.scale.z);
 	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(t.rotate.x,t.rotate.y,t.rotate.z);
 	DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(t.translate.x,t.translate.y,t.translate.z);
@@ -356,6 +345,5 @@ void Renderer::CalculateMatrix(Transform t)
 	worldMatrix = scale;
 	worldMatrix = DirectX::XMMatrixMultiply(worldMatrix, rotm);
 	worldMatrix = DirectX::XMMatrixMultiply(worldMatrix, translation);
-	//worldMatrix = DirectX::XMMatrixMultiply(worldMatrix, scale);
 	worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
 }
