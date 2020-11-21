@@ -46,7 +46,9 @@ WinMain(
 	t.rotate = {0,3.14f,0};
 	
 	t.scale = {0.05f,0.05f,0.05f};
-	Model cb("Assets\\Link\\link.obj", r);
+	//Model cb("Assets\\Link\\link.obj", r);
+	Model cb("baldosa_relleno.glb", r);
+	
 	//Model cb("cube.obj", r);
 	
 	Time::Init();

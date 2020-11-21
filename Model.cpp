@@ -109,9 +109,9 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 
 		
 		
-		std::string textureFileName = "\\"+file;//.substr(file.find_last_of('\\'), file.size() - 1);
+		//std::string textureFileName = "\\"+file;//.substr(file.find_last_of('\\'), file.size() - 1);
 		//textureFileName.pop_back();
-		std::string texturePath = directory + textureFileName;
+		std::string texturePath = directory;// + textureFileName;
 		
 		texture.id = Loader::load_image(texturePath, *renderer);
 		//texture.type =

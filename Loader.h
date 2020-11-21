@@ -11,7 +11,7 @@ class Loader
 public:
 	std::vector<Mesh> LoadOBJ(std::string path, Renderer& r) const;
 	
-	static void* load_image(std::string path, Renderer& r);
+	static void* load_image(const std::string& path, Renderer& r);
 	
 };
 
