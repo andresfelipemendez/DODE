@@ -1,16 +1,12 @@
 #pragma once
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+
 #include <string>
 #include <vector>
 
-
 #include "Types.h"
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>           
-#include <assimp/postprocess.h>
-
-#include "Renderer.h"
-
 
 class Model
 {
@@ -21,12 +17,12 @@ public:
 	std::vector<Mesh> meshes;
 private:
 	
-	std::string directory;
-	Renderer* renderer;
+	std::string m_Directory;
+	Renderer* m_Renderer;
 
-	void loadModel(std::string path);
-	void processNode(aiNode* node, const aiScene* scene);
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+	void LoadModel(const std::string& path);
+	void ProcessNode(aiNode* node, const aiScene* scene);
+	Mesh ProcessMesh(aiMesh* mesh, const aiScene* scene);
+	std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type) const;
 };
 

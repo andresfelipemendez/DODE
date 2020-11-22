@@ -1,7 +1,7 @@
 #pragma once
+#include <d3d11.h>
 #include <string>
 #include <vector>
-
 
 class Renderer;
 
@@ -11,36 +11,38 @@ struct Texture
 	std::string path;
 };
 
-struct vec3
+struct Vec3
 {
 	float x = 0, y = 0, z = 0;
 };
 
 struct Transform
 {
-	vec3 translate;
-	vec3 rotate;
-	vec3 scale;
+	Vec3 translate;
+	Vec3 rotate;
+	Vec3 scale;
 };
 
-struct vec2
+struct Vec2
 {
 	float x = 0, y = 0;
-	void normalize();
+	void Normalize();
 	float GetMagnitude() const;
 };
 
-struct Vertex {
+struct Vertex
+{
 	float position[3];
 	float normal[3];
 	float uv[2];
 };
 
-struct Mesh {
-	void* indexBuffer;
-	void* vertexBuffer;
+struct Mesh
+{
+	ID3D11Buffer* index_buffer;
+	ID3D11Buffer* vertex_buffer;
 	Texture texture;
-	size_t numIndices;
+	size_t num_indices;
 	void Draw(Renderer* renderer, Transform t) const;
 };
 

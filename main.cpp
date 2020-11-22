@@ -1,61 +1,53 @@
-#define NOMINMAX
-#include <Windows.h>
 
-#include "imgui.h"
-#include "imgui_impl_win32.h"
-#include "imgui_impl_dx11.h"
-
+#include "Input.h"
+#include "Loader.h"
+#include "Model.h"
 #include "Platform.h"
 #include "Renderer.h"
-
-#include "Loader.h"
 #include "Time.h"
-#include "Input.h"
-#include "Model.h"
-#include "Utils.h"
+
+#include "imgui.h"
+#include "imgui_impl_dx11.h"
+#include "imgui_impl_win32.h"
+
+#undef max
+#undef min
+#include <Windows.h>
 
 int CALLBACK
-WinMain(
-	_In_ HINSTANCE Instance,
-	_In_opt_  HINSTANCE PrevInstance,
-	_In_ LPSTR CommandLine,
-	_In_ int ShowCode)
+WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_code)
 {
-	Renderer r;
+	Renderer r{};
 	Platform p{};
-	Loader l;
+	
 	const auto width = 800;
 	const auto height = 600;
 
-	p.OpenWindow(width, height, Instance, ShowCode, &Win32MainWindowCallback);
-	r.Initialize(p.WindowHandle, width, height);
+	p.OpenWindow(width, height, instance, show_code, &Win32MainWindowCallback);
+	r.Initialize(p.window_handle, width, height);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+	auto& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 	
 	ImGui::StyleColorsDark();
 
-	ImGui_ImplWin32_Init(p.WindowHandle);
+	ImGui_ImplWin32_Init(p.window_handle);
 	ImGui_ImplDX11_Init(r.d3ddev, r.d3dctx);
 
 	Transform t;
-	t.translate=  {0,-3.0f,0};
-	t.rotate = {0,3.14f,0};
-	
-	t.scale = {0.05f,0.05f,0.05f};
-	//Model cb("Assets\\Link\\link.obj", r);
+	t.translate = {0, 0.0f, 0};
+	t.rotate = {0, 3.14f, 0};
+	t.scale = {1.0f, 1.0f, 1.0f};
+
 	Model cb("baldosa_relleno.glb", r);
-	
-	//Model cb("cube.obj", r);
 	
 	Time::Init();
 
-	MSG Message = { 0 };
-
-	 bool show_demo_window = false;
+	MSG message;
+	auto show_demo_window = false;
 	
 	while (true)
 	{
@@ -63,18 +55,17 @@ WinMain(
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		
 		Time::Tick();
 		Input::Update();
 		
-		r.CameraPosition(Input::leftThumb, Time::GetDeltaTime());
-		r.CameraRotation(Input::rightThumb, Time::GetDeltaTime());
+		r.CameraPosition(Input::left_thumb, Time::GetDeltaTime());
+		r.CameraRotation(Input::right_thumb, Time::GetDeltaTime());
 
-		if (PeekMessage(&Message, 0, 0, 0, PM_REMOVE) > 0)
+		if (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE) > 0)
 		{
-			TranslateMessage(&Message);
-			DispatchMessage(&Message);
-			if (Message.message == WM_QUIT)
+			TranslateMessage(&message);
+			DispatchMessage(&message);
+			if (message.message == WM_QUIT)
 			{
 				break;
 			}
@@ -87,11 +78,11 @@ WinMain(
 		
 		ImGui::Begin("Hello, world!");
 		ImGui::Text("This is some useful text.");
-		ImGui::InputFloat2("Left Thumb",&Input::leftThumb.x);
-		ImGui::InputFloat3("Camera pos",&r.camera_pos_.x);
-		ImGui::DragFloat3("translation",&t.translate.x);
-		ImGui::DragFloat3("rotation",&t.rotate.x,0.01f);
-		ImGui::DragFloat3("scale",&t.scale.x,0.01f);
+		ImGui::InputFloat2("Left Thumb", &Input::left_thumb.x);
+		ImGui::InputFloat3("Camera pos", &r.camera_pos.x);
+		ImGui::DragFloat3("translation", &t.translate.x);
+		ImGui::DragFloat3("rotation", &t.rotate.x, 0.01f);
+		ImGui::DragFloat3("scale", &t.scale.x, 0.01f);
 		
 		ImGui::End();
 
@@ -101,7 +92,7 @@ WinMain(
 
 		cb.Draw(t);
 		
-		 if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();

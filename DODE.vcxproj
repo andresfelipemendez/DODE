@@ -153,7 +153,7 @@
     <ClCompile Include="imgui_widgets.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="Loader.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Main.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -179,9 +179,6 @@
     <ClInclude Include="Time.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Utils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Xsd Include="cube.obj">

@@ -1,7 +1,10 @@
 #pragma once
+#include <combaseapi.h>
+
+
 struct Platform
 {
-	int OpenWindow(int width, int height, HINSTANCE Instance, int ShowCode, WNDPROC callback);
-	HWND WindowHandle;
+	int OpenWindow(int width, int height, HINSTANCE instance, int show_code, WNDPROC callback);
+	HWND window_handle;
 };
 

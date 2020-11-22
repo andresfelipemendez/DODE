@@ -1,5 +1,7 @@
 #include "Time.h"
-
+#define NOMINMAX
+#undef max
+#undef min
 #include <windows.h>
 
 long long int Time::previousTime;

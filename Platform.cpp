@@ -1,8 +1,10 @@
-#include <windows.h>
 #include "Platform.h"
+#define NOMINMAX
+#undef max
+#undef min
+#include <Windows.h>
 
-
-int Platform::OpenWindow(int width, int height, HINSTANCE Instance, int ShowCode, WNDPROC callback)
+int Platform::OpenWindow(int width, int height, HINSTANCE instance, int show_code, WNDPROC callback)
 {
 	WNDCLASSEX wnd;
 	ZeroMemory(&wnd, sizeof(WNDCLASSEX));
@@ -10,7 +12,7 @@ int Platform::OpenWindow(int width, int height, HINSTANCE Instance, int ShowCode
 	wnd.cbSize = sizeof(WNDCLASSEX);
 	wnd.style = CS_HREDRAW | CS_VREDRAW;
 	wnd.lpfnWndProc = callback;
-	wnd.hInstance = Instance;
+	wnd.hInstance = instance;
 	wnd.hCursor = LoadCursor(0, IDC_ARROW);
 	wnd.hbrBackground = (HBRUSH)COLOR_WINDOW;
 	wnd.lpszClassName = L"Window Class";
@@ -19,7 +21,7 @@ int Platform::OpenWindow(int width, int height, HINSTANCE Instance, int ShowCode
 	RECT wr = { 0, 0, 1920, 1080 };
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 
-	WindowHandle = CreateWindowEx(
+	window_handle = CreateWindowEx(
 		0,
 		L"Window Class",
 		L"Windows Programming",
@@ -30,16 +32,16 @@ int Platform::OpenWindow(int width, int height, HINSTANCE Instance, int ShowCode
 		height,
 		NULL,
 		NULL,
-		Instance,
+		instance,
 		NULL);
 
-	if (WindowHandle == NULL)
+	if (window_handle == NULL)
 	{
 		system("PAUSE");
 		return -1;
 	}
 
-	ShowWindow(WindowHandle, ShowCode);
+	ShowWindow(window_handle, show_code);
 
 	return 0;
 }

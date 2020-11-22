@@ -1,87 +1,78 @@
 #include "Input.h"
-
-#include <windows.h>
-
+#include <Windows.h>
 #include "imgui_impl_win32.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+extern IMGUI_IMPL_API LRESULT ImGuiImplWin32WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 static POINT point;
 
-vec2 Input::leftThumb;
-vec2 Input::rightThumb;
+Vec2 Input::left_thumb;
+Vec2 Input::right_thumb;
+XINPUT_STATE Input::m_State;
 
-void Input::Update() {
-	ZeroMemory(&state, sizeof(XINPUT_STATE));
-	XInputGetState(0, &state);
+void Input::Update()
+{
+	ZeroMemory(&m_State, sizeof(XINPUT_STATE));
+	XInputGetState(0, &m_State);
 
-	leftThumb = {
-		static_cast<float>(state.Gamepad.sThumbLX),
-		static_cast<float>(state.Gamepad.sThumbLY)
+	left_thumb = {
+		static_cast<float>(m_State.Gamepad.sThumbLX),
+		static_cast<float>(m_State.Gamepad.sThumbLY)
 	};
 
-	if (leftThumb.GetMagnitude() > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
+	if (left_thumb.GetMagnitude() > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE)
 	{
-		leftThumb.normalize();
+		left_thumb.Normalize();
 	}
 	else
 	{
-		leftThumb = {0,0};	
+		left_thumb = {0, 0};	
 	}
 	
-	rightThumb = {
-		static_cast<float>(state.Gamepad.sThumbRX),
-		static_cast<float>(state.Gamepad.sThumbRY)
+	right_thumb = {
+		static_cast<float>(m_State.Gamepad.sThumbRX),
+		static_cast<float>(m_State.Gamepad.sThumbRY)
 	};
 
-	if (rightThumb.GetMagnitude() > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
+	if (right_thumb.GetMagnitude() > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE)
 	{
-		rightThumb.normalize();
+		right_thumb.Normalize();
 	}
 	else
 	{
-		rightThumb = {0,0};
+		right_thumb = {0, 0};
 	}
 }
 
-XINPUT_STATE Input::state;
-
-LRESULT CALLBACK
-Win32MainWindowCallback(HWND Window,
-	UINT Message,
-	WPARAM WParam,
-	LPARAM LParam)
+LRESULT CALLBACK Win32MainWindowCallback(HWND window, UINT message, WPARAM w_param, LPARAM l_param)
 {
 	RECT rect;
-	GetWindowRect(Window, &rect);
+	GetWindowRect(window, &rect);
 	GetCursorPos(&point);
 	point.x -= rect.left;
 	point.y -= rect.top;
-	LRESULT Result = 0;
-
-	if (ImGui_ImplWin32_WndProcHandler(Window, Message, WParam, LParam))
+	
+	if (ImGuiImplWin32WndProcHandler(window, message, w_param, l_param))
 		return true;
-	switch (Message)
+	switch (message)
 	{
-
 	case WM_DESTROY:
-	{
-		PostQuitMessage(0);
-		return 0;
-	}
-	break;
-	case WM_SYSKEYDOWN:
-	case WM_KEYDOWN:
-	{
-		switch (WParam)
 		{
-		case VK_ESCAPE:
 			PostQuitMessage(0);
 			return 0;
-		default:
-			break;
 		}
+	case WM_SYSKEYDOWN:
+	case WM_KEYDOWN:
+		{
+			if (w_param == VK_ESCAPE)
+			{
+				PostQuitMessage(0);
+				return 0;
+			}
+		}
+		break;
+	default: 
+		break;
 	}
-	break;
-	}
-	return DefWindowProc(Window, Message, WParam, LParam);
+	return DefWindowProc(window, message, w_param, l_param);
 }

@@ -32,8 +32,8 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 {
 	HRESULT hr;
 
-	look_at_.x = 0;
-	look_at_.y = 0;
+	look_at.x = 0;
+	look_at.y = 0;
 
 	IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
@@ -69,12 +69,12 @@ void Renderer::Initialize(HWND WindowHandle,int SCREEN_WIDTH, int SCREEN_HEIGHT)
 		1,							//  FeatureLevels
 		D3D11_SDK_VERSION,			//	SDKVersion
 		&scd,						//	pSwapChainDesc
-		&sc,						//	ppSwapChain
+		&m_SwapChain,						//	ppSwapChain
 		&d3ddev,					//	ppDevice
 		nullptr,						//	pFeatureLevel
 		&d3dctx);					//	ppImmediateContext
 
-	hr = sc->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&d3dbb);
+	hr = m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&d3dbb);
 
 	D3D11_RENDER_TARGET_VIEW_DESC vd;
 	D3D11_VIEWPORT vp;
@@ -160,33 +160,34 @@ void Renderer::Clear() {
 	float color[4] = { 0.0f, 0.5f, 0.5f, 1.0f };
 	d3dctx->ClearRenderTargetView(view, color);
 
-	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(camera_rot_.x,camera_rot_.y,camera_rot_.z);
-	
-	auto translation = DirectX::XMMatrixTranslation(camera_pos_.x,camera_pos_.y,camera_pos_.z);
+	const auto rotMatrix = DirectX::XMMatrixRotationRollPitchYaw(camera_rot.x,camera_rot.y,camera_rot.z);
 
-	viewMatrix = DirectX::XMMatrixMultiply(rotm,translation);
+	const auto translation = DirectX::XMMatrixTranslation(camera_pos.x,camera_pos.y,camera_pos.z);
+
+	viewMatrix = DirectX::XMMatrixMultiply(rotMatrix,translation);
 	viewMatrix = DirectX::XMMatrixInverse(nullptr,viewMatrix);
 	viewMatrix = DirectX::XMMatrixTranspose(viewMatrix);
 }
 
-void Renderer::Present() {
-	HRESULT res = sc->Present(0, 0);
+void Renderer::Present() const
+{
+	m_SwapChain->Present(0, 0);
 }
 
-void Renderer::viewport()
+void Renderer::viewport() const
 {
 	float color[4] = { 0.0f, 0.5f, 0.5f, 1.0f };
-	d3dctx->OMSetRenderTargets(1, &view, NULL);
+	d3dctx->OMSetRenderTargets(1, &view, nullptr);
 	d3dctx->ClearRenderTargetView(view, color);
 }
 
-void Renderer::CameraRotation(const vec2& dir, double deltaTime)
+void Renderer::CameraRotation(const Vec2& dir, double deltaTime)
 {
-	camera_rot_.x += -dir.y * deltaTime;
-	camera_rot_.y += dir.x * deltaTime;
+	camera_rot.x += static_cast<float>(deltaTime * static_cast<double>(-dir.y));
+	camera_rot.y += static_cast<float>(static_cast<double>(dir.x) * deltaTime);
 }
 
-void* Renderer::CreateVertexBuffer(Vertex* vertices, size_t size)
+ID3D11Buffer* Renderer::CreateVertexBuffer(Vertex* vertices, size_t size) const
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
@@ -201,20 +202,23 @@ void* Renderer::CreateVertexBuffer(Vertex* vertices, size_t size)
 	InitData.SysMemPitch = 0;
 	InitData.SysMemSlicePitch = 0;
 
-	ID3D11Buffer* pVertexBuffer = 0;
+	ID3D11Buffer* pVertexBuffer = nullptr;
 	d3ddev->CreateBuffer(&bufferDesc, NULL, &pVertexBuffer);
 
-	unsigned int sovc = sizeof(vertices[0]) * size;
 	D3D11_MAPPED_SUBRESOURCE ms;
-
-	d3dctx->Map(pVertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
-	memcpy(ms.pData, vertices, sizeof(vertices[0]) * size);
-	d3dctx->Unmap(pVertexBuffer, NULL);
-		
+	if(pVertexBuffer) {
+		d3dctx->Map(pVertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+		memcpy(ms.pData, vertices, sizeof(vertices[0]) * size);
+		d3dctx->Unmap(pVertexBuffer, NULL);		
+	}
+	else
+	{
+		return nullptr;
+	}
 	return pVertexBuffer;
 }
 
-void* Renderer::CreateIndexBuffer(unsigned int* indices, unsigned int size)
+ID3D11Buffer* Renderer::CreateIndexBuffer(const unsigned int* indices, unsigned int size) const
 {
 	D3D11_BUFFER_DESC bufferDesc;
 	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
@@ -236,7 +240,7 @@ void* Renderer::CreateIndexBuffer(unsigned int* indices, unsigned int size)
 	return pIndexBuffer;
 }
 
-void* Renderer::create_texture_buffer(const unsigned char* data,int x,int y,int n) const
+ID3D11ShaderResourceView* Renderer::CreateTextureBuffer(const unsigned char* data,int x,int y,int n) const
 {
 	D3D11_TEXTURE2D_DESC desc;
 	desc.Width = x;
@@ -255,20 +259,20 @@ void* Renderer::create_texture_buffer(const unsigned char* data,int x,int y,int 
 	d[0].pSysMem = data;
 	d[0].SysMemPitch = (x * n) * sizeof(unsigned char);
 ;
-	ID3D11Texture2D *pTexture = NULL;
-	HRESULT  hr = d3ddev->CreateTexture2D( &desc, NULL, &pTexture );
+	ID3D11Texture2D* p_texture = nullptr;
+	auto hr = d3ddev->CreateTexture2D( &desc, nullptr, &p_texture );
 
 	if (FAILED(hr))
 	{
-		return pTexture;
+		return nullptr;
 	}
 
 	d3dctx->UpdateSubresource(
-		pTexture,
+		p_texture,
 		0,
-		NULL,
+		nullptr,
 		data,
-		(x * n) * sizeof(unsigned char),
+		(static_cast<unsigned long long>(x) * n) * sizeof(unsigned char),
 		0
 	);
 
@@ -278,31 +282,29 @@ void* Renderer::create_texture_buffer(const unsigned char* data,int x,int y,int 
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = -1;
 
-	ID3D11ShaderResourceView* textureView;
+	ID3D11ShaderResourceView* texture_view;
 	hr = d3ddev->CreateShaderResourceView(
-	  pTexture,
-	  &srvDesc,
-	  &textureView
+		p_texture,
+		&srvDesc,
+		&texture_view
 	);
 
 	if (FAILED(hr))
 	{
-		return pTexture;
+		return nullptr;
 	}
 
-	d3dctx->GenerateMips(textureView);
+	d3dctx->GenerateMips(texture_view);
 	
-	return textureView;
+	return texture_view;
 }
 
-void Renderer::SetBuffers(Transform t, unsigned int numIndices, void* indexBuffer, void* vertexBuffer, void* texture)
+void Renderer::SetBuffers(Transform t, unsigned int num_indices, ID3D11Buffer* index_buffer, ID3D11Buffer* vertex_buffer, void* texture)
 {
-	D3D11_MAPPED_SUBRESOURCE resource;
-
 	CalculateMatrix(t);
 
-	HRESULT result = d3dctx->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
+	d3dctx->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	dataPtr = static_cast<MatrixBufferType*>(mappedResource.pData);
 
 	dataPtr->world = worldMatrix;
 	dataPtr->view = viewMatrix;
@@ -312,28 +314,28 @@ void Renderer::SetBuffers(Transform t, unsigned int numIndices, void* indexBuffe
 
 	bufferNumber = 0;
 	d3dctx->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
-	auto tx = static_cast<ID3D11ShaderResourceView*>(texture);
+	auto* tx = static_cast<ID3D11ShaderResourceView*>(texture);
 	d3dctx->PSSetShaderResources(0, 1, &tx);
 
 	unsigned int off = 0;
 	unsigned int str = sizeof(Vertex);
-	d3dctx->IASetIndexBuffer((ID3D11Buffer*)indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-	d3dctx->IASetVertexBuffers(0, 1, (ID3D11Buffer*const*)&vertexBuffer, &str, &off);
+	d3dctx->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
+	d3dctx->IASetVertexBuffers(0, 1, &vertex_buffer, &str, &off);
 
-	d3dctx->DrawIndexed(numIndices, 0, 0);
+	d3dctx->DrawIndexed(num_indices, 0, 0);
 }
 
-void Renderer::CameraPosition(const vec2& lt, double get_delta_time)
+void Renderer::CameraPosition(const Vec2& lt, double get_delta_time)
 {
-	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(camera_rot_.x,camera_rot_.y,camera_rot_.z);
+	DirectX::XMMATRIX rotm = DirectX::XMMatrixRotationRollPitchYaw(camera_rot.x,camera_rot.y,camera_rot.z);
 	
 	DirectX::XMVECTOR cpos = DirectX::XMVectorSet(lt.x,0,lt.y,0);
 	
 	cpos = DirectX::XMVector3TransformNormal(cpos,rotm);
 	
-	camera_pos_.x += DirectX::XMVectorGetX(cpos) * get_delta_time * 4;
-	camera_pos_.y += DirectX::XMVectorGetY(cpos) * get_delta_time * 4;
-	camera_pos_.z += DirectX::XMVectorGetZ(cpos) * get_delta_time * 4;
+	camera_pos.x += DirectX::XMVectorGetX(cpos) * get_delta_time * 4;
+	camera_pos.y += DirectX::XMVectorGetY(cpos) * get_delta_time * 4;
+	camera_pos.z += DirectX::XMVectorGetZ(cpos) * get_delta_time * 4;
 }
 
 void Renderer::CalculateMatrix(Transform t)
