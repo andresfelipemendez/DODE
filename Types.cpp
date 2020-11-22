@@ -22,7 +22,7 @@ float Vec2::GetMagnitude() const
 void Mesh::Draw(Renderer* renderer, Transform t) const
 {
 	Vec3 pos = { 0.0f, 0.0f, 0.0f };
-	renderer->SetBuffers(t, num_indices, index_buffer, vertex_buffer, texture.id);
+	renderer->Draw(t, num_indices, index_buffer, vertex_buffer, texture.id);
 }
 
 Mesh CreateMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices,

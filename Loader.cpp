@@ -14,7 +14,11 @@ void* Loader::LoadImage(const std::string& path, Renderer& r)
 	if(data == nullptr) {
 		const auto* const msg = stbi_failure_reason();
 		Log(msg);
-		return nullptr;
+
+		auto* const data = stbi_load("Assets\\Textures\\OutsSS04.png", &x, &y, &n, 0);
+		r.CreateTextureBuffer(data,x,y,n);
+		
+		return data;
 	}
 
 	return r.CreateTextureBuffer(data,x,y,n);

@@ -1,8 +1,8 @@
 #include "Input.h"
 #include <Windows.h>
-#include "imgui_impl_win32.h"
+#include "Lib/imgui/imgui.h"
 
-extern IMGUI_IMPL_API LRESULT ImGuiImplWin32WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGuiImplWin32WndProcHandler(HWND h_wnd, UINT msg, WPARAM w_param, LPARAM l_param);
 
 static POINT point;
 
@@ -12,7 +12,7 @@ XINPUT_STATE Input::m_State;
 
 void Input::Update()
 {
-	ZeroMemory(&m_State, sizeof(XINPUT_STATE));
+	m_State = {};
 	XInputGetState(0, &m_State);
 
 	left_thumb = {

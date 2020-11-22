@@ -1,5 +1,5 @@
 #include "Platform.h"
-#define NOMINMAX
+
 #undef max
 #undef min
 #include <Windows.h>
@@ -13,12 +13,12 @@ int Platform::OpenWindow(int width, int height, HINSTANCE instance, int show_cod
 	wnd.style = CS_HREDRAW | CS_VREDRAW;
 	wnd.lpfnWndProc = callback;
 	wnd.hInstance = instance;
-	wnd.hCursor = LoadCursor(0, IDC_ARROW);
-	wnd.hbrBackground = (HBRUSH)COLOR_WINDOW;
+	wnd.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wnd.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW);
 	wnd.lpszClassName = L"Window Class";
 	RegisterClassEx(&wnd);
 
-	RECT wr = { 0, 0, 1920, 1080 };
+	RECT wr = {0, 0, width, height};
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
 
 	window_handle = CreateWindowEx(
@@ -30,18 +30,16 @@ int Platform::OpenWindow(int width, int height, HINSTANCE instance, int show_cod
 		0,
 		width,
 		height,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		instance,
-		NULL);
+		nullptr);
 
-	if (window_handle == NULL)
+	if (window_handle == nullptr)
 	{
-		system("PAUSE");
 		return -1;
 	}
 
 	ShowWindow(window_handle, show_code);
-
 	return 0;
 }

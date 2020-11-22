@@ -1,4 +1,4 @@
-
+// ReSharper disable CppMissingIndent
 #include "Input.h"
 #include "Loader.h"
 #include "Model.h"
@@ -6,9 +6,9 @@
 #include "Renderer.h"
 #include "Time.h"
 
-#include "imgui.h"
-#include "imgui_impl_dx11.h"
-#include "imgui_impl_win32.h"
+#include "Lib/imgui/imgui.h"
+#include "Lib/imgui/imgui_impl_dx11.h"
+#include "Lib/imgui/imgui_impl_win32.h"
 
 #undef max
 #undef min
@@ -20,8 +20,8 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 	Renderer r{};
 	Platform p{};
 	
-	const auto width = 800;
-	const auto height = 600;
+	const auto width = 1920;
+	const auto height = 1080;
 
 	p.OpenWindow(width, height, instance, show_code, &Win32MainWindowCallback);
 	r.Initialize(p.window_handle, width, height);
@@ -38,16 +38,16 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 	ImGui_ImplDX11_Init(r.d3ddev, r.d3dctx);
 
 	Transform t;
-	t.translate = {0, 0.0f, 0};
-	t.rotate = {0, 3.14f, 0};
-	t.scale = {1.0f, 1.0f, 1.0f};
+	t.translate = {2, 1.0f, 0};
+	t.rotate = {0, 0, 0};
+	t.scale = {0.01f, 0.01f, 0.01f};
 
-	Model cb("baldosa_relleno.glb", r);
+	//Model cb("baldosa_relleno.glb", r);
+	Model sphere("Assets\\sphere.obj", r);
 	
 	Time::Init();
 
 	MSG message;
-	auto show_demo_window = false;
 	
 	while (true)
 	{
@@ -58,8 +58,8 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 		Time::Tick();
 		Input::Update();
 		
-		r.CameraPosition(Input::left_thumb, Time::GetDeltaTime());
-		r.CameraRotation(Input::right_thumb, Time::GetDeltaTime());
+		r.CameraPosition(Input::left_thumb, Time::deltaTime);
+		r.CameraRotation(Input::right_thumb, Time::deltaTime);
 
 		if (PeekMessage(&message, nullptr, 0, 0, PM_REMOVE) > 0)
 		{
@@ -72,12 +72,9 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 		}
 		
 		r.Clear();
-
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
 		
 		ImGui::Begin("Hello, world!");
-		ImGui::Text("This is some useful text.");
+		ImGui::InputFloat("Frame Rate", &Time::deltaTime, 0, 0, "%.6f");
 		ImGui::InputFloat2("Left Thumb", &Input::left_thumb.x);
 		ImGui::InputFloat3("Camera pos", &r.camera_pos.x);
 		ImGui::DragFloat3("translation", &t.translate.x);
@@ -87,10 +84,15 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 		ImGui::End();
 
 		ImGui::Render();
-		r.viewport();
+		r.Viewport();
+
 		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-		cb.Draw(t);
+		r.DrawLine({-10.0f, 0, 0}, {10.0f, 0, 0});
+		r.DrawLine({0, -10.0f, 0}, {0, 10.0f, 0});
+		r.DrawLine({0, 0, -10.0f}, {0, 0, 10.0f});
+
+		r.DrawCircle({},1);
 		
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
