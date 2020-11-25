@@ -394,8 +394,27 @@ void Renderer::DrawLine(Vec3 p1, Vec3 p2)
 	d3dctx->Draw(2, 0);
 }
 
-void Renderer::DrawCircle(Vec3 center, float radius)
+
+
+void Renderer::DrawCircle(Vec3 center, float radius = 1)
 {
+	Transform t;
+	t.scale *= radius;
+	t.translate = center;
+	CalculateMatrix(t);
+
+	d3dctx->Map(m_MatrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_MappedResource);
+	m_DataPtr = static_cast<MatrixBufferType*>(m_MappedResource.pData);
+
+	m_DataPtr->world = m_WorldMatrix;
+	m_DataPtr->view = m_ViewMatrix;
+	m_DataPtr->projection = m_ProjectionMatrix;
+
+	d3dctx->Unmap(m_MatrixBuffer, 0);
+
+	m_BufferNumber = 0;
+	d3dctx->VSSetConstantBuffers(m_BufferNumber, 1, &m_MatrixBuffer);
+	
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	d3dctx->IASetVertexBuffers(0, 1, &m_SphereVertexBuffer, &stride, &offset);
@@ -478,6 +497,7 @@ std::vector<Vertex> Renderer::m_Sphere{
 	{0.965926f, 0.000000f, 0.258819f},
 	{0.965926f, 0.000000f, 0.258819f},
 	{1.000000f, 0.000000f, 0.000000f},
+	
 	{0.000000f, 1.000000f, 0.000000f},
 	{-0.258819f, 0.965926f, 0.000000f},
 	{-0.258819f, 0.965926f, 0.000000f},

@@ -14,13 +14,16 @@ struct Texture
 struct Vec3
 {
 	float x = 0, y = 0, z = 0;
+	::Vec3& operator*=(const float& radius);
 };
+
+Vec3 operator*(Vec3& lhs, const float& rhs);
 
 struct Transform
 {
 	Vec3 translate;
 	Vec3 rotate;
-	Vec3 scale;
+	Vec3 scale{1, 1, 1};
 };
 
 struct Vec2

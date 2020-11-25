@@ -4,11 +4,28 @@
 
 #include "Renderer.h"
 
+Vec3 operator*(const Vec3& lhs, const float& rhs)
+{
+	Vec3 ret;
+	ret.x = lhs.x * rhs;
+	ret.y = lhs.y * rhs;
+	ret.z = lhs.z * rhs;
+	return ret;
+}
+
+::Vec3& Vec3::operator*=(const float& radius)
+{
+	this->x *= radius;
+	this->y *= radius;
+	this->z *= radius;
+	return *this;
+}
+
 void Vec2::Normalize()
 {
-	const auto magnitude = GetMagnitude();
-	x = x / magnitude;
-	y = y / magnitude;
+    const auto magnitude = GetMagnitude();
+    x = x / magnitude;
+    y = y / magnitude;
 }
 
 float Vec2::GetMagnitude() const
@@ -21,12 +38,12 @@ float Vec2::GetMagnitude() const
 
 void Mesh::Draw(Renderer* renderer, Transform t) const
 {
-	Vec3 pos = { 0.0f, 0.0f, 0.0f };
+	Vec3 pos = { 0.0f, 0.0f, 0.0f};
 	renderer->Draw(t, num_indices, index_buffer, vertex_buffer, texture.id);
 }
 
 Mesh CreateMesh(const std::vector<Vertex>& vertices, const std::vector<unsigned>& indices,
-				const std::vector<Texture>& textures, Renderer* renderer)
+                const std::vector<Texture>& textures, Renderer* renderer)
 {
 	Mesh m {};
 	m.vertex_buffer = renderer->CreateVertexBuffer(const_cast<Vertex*>(&vertices[0]), vertices.size());
