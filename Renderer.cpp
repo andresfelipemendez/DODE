@@ -151,19 +151,31 @@ void Renderer::Initialize(HWND window_handle, float screen_width, float screen_h
 
 
 	D3D11_BUFFER_DESC vertex_buffer_desc;
- 
 	vertex_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
 	vertex_buffer_desc.ByteWidth = 2 * sizeof( Vertex );
 	vertex_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertex_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	vertex_buffer_desc.MiscFlags = 0;
  
-	if(FAILED(d3ddev->CreateBuffer( &vertex_buffer_desc, NULL, &m_VertexBuffer ) ) )
+	if (FAILED(d3ddev->CreateBuffer( &vertex_buffer_desc, NULL, &m_VertexBuffer ) ) )
 		return;
  
-	/*this->bIsInitialized = true;
- 
-	return this->bIsInitialized;*/
+	D3D11_BUFFER_DESC buffer_desc{};
+	buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+	buffer_desc.ByteWidth = static_cast<UINT>(sizeof(Vertex)) * m_Sphere.size();
+	buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	m_SphereVertexBuffer = nullptr;
+	d3ddev->CreateBuffer(&buffer_desc, nullptr, &m_SphereVertexBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	if (m_SphereVertexBuffer) 
+	{
+		d3dctx->Map(m_SphereVertexBuffer, NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+		memcpy(ms.pData, &m_Sphere[0], sizeof(Vertex) * m_Sphere.size());
+		d3dctx->Unmap(m_SphereVertexBuffer, NULL);		
+	}
 }
 
 void Renderer::Clear()
@@ -362,8 +374,6 @@ void Renderer::DrawLine(Vec3 p1, Vec3 p2)
 		return;
 
 	auto* const v = static_cast<Vertex*>(map_data.pData);
-
-	
 	v[0].position[0] = p1.x;
 	v[0].position[1] = p1.y;
 	v[0].position[2] = p1.z;
@@ -386,70 +396,11 @@ void Renderer::DrawLine(Vec3 p1, Vec3 p2)
 
 void Renderer::DrawCircle(Vec3 center, float radius)
 {
-	for (auto i = 0; i < 24; ++i)
-	{
-		auto right = DirectX::XMVectorSet(1, 0, 0, 0);
-		auto yaw = DirectX::XMConvertToRadians((15.0f) * static_cast<float>(i));
-		auto rotation = DirectX::XMMatrixRotationRollPitchYaw(0, yaw, 0);
-		right = DirectX::XMVector3TransformNormal(right, rotation);
-		auto x1 = DirectX::XMVectorGetX(right);
-		auto y1 = DirectX::XMVectorGetY(right);
-		auto z1 = DirectX::XMVectorGetZ(right);
-		
-		right = DirectX::XMVectorSet(1, 0, 0, 0);
-		yaw = DirectX::XMConvertToRadians((15.0f) * (static_cast<float>(i) + 1));
-		rotation = DirectX::XMMatrixRotationRollPitchYaw(0, yaw, 0);
-		right = DirectX::XMVector3TransformNormal(right, rotation);
-		auto x2 = DirectX::XMVectorGetX(right);
-		auto y2 = DirectX::XMVectorGetY(right);
-		auto z2 = DirectX::XMVectorGetZ(right);
-		
-		DrawLine({x1,y1,z1},{x2,y2,z2});
-	}
-
-	for (auto i = 0; i < 24; ++i)
-	{
-		auto right = DirectX::XMVectorSet(0, 1, 0, 0);
-		auto roll = DirectX::XMConvertToRadians((15.0f) * static_cast<float>(i));
-		auto rotation = DirectX::XMMatrixRotationRollPitchYaw(0, 0, roll);
-		right = DirectX::XMVector3TransformNormal(right, rotation);
-		auto x1 = DirectX::XMVectorGetX(right);
-		auto y1 = DirectX::XMVectorGetY(right);
-		auto z1 = DirectX::XMVectorGetZ(right);
-		
-		right = DirectX::XMVectorSet(0, 1, 0, 0);
-		roll = DirectX::XMConvertToRadians((15.0f) * (static_cast<float>(i) + 1));
-		rotation = DirectX::XMMatrixRotationRollPitchYaw(0, 0, roll);
-		right = DirectX::XMVector3TransformNormal(right, rotation);
-		auto x2 = DirectX::XMVectorGetX(right);
-		auto y2 = DirectX::XMVectorGetY(right);
-		auto z2 = DirectX::XMVectorGetZ(right);
-		
-		DrawLine({x1,y1,z1},{x2,y2,z2});
-	}
-
-	for (auto i = 0; i < 24; ++i)
-	{
-		auto right = DirectX::XMVectorSet(0, 0, 1, 0);
-		auto pitch = DirectX::XMConvertToRadians((15.0f) * static_cast<float>(i));
-		auto rotation = DirectX::XMMatrixRotationRollPitchYaw(pitch, 0, 0);
-		right = DirectX::XMVector3TransformNormal(right, rotation);
-		auto x1 = DirectX::XMVectorGetX(right);
-		auto y1 = DirectX::XMVectorGetY(right);
-		auto z1 = DirectX::XMVectorGetZ(right);
-		
-		right = DirectX::XMVectorSet(0, 0, 1, 0);
-		pitch = DirectX::XMConvertToRadians((15.0f) * (static_cast<float>(i) + 1));
-		rotation = DirectX::XMMatrixRotationRollPitchYaw(pitch, 0, 0);
-		right = DirectX::XMVector3TransformNormal(right, rotation);
-		auto x2 = DirectX::XMVectorGetX(right);
-		auto y2 = DirectX::XMVectorGetY(right);
-		auto z2 = DirectX::XMVectorGetZ(right);
-		
-		DrawLine({x1,y1,z1},{x2,y2,z2});
-	}
-	
-	return;
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+	d3dctx->IASetVertexBuffers(0, 1, &m_SphereVertexBuffer, &stride, &offset);
+	d3dctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);	
+	d3dctx->Draw(m_Sphere.size(), 0);
 }
 
 
@@ -476,3 +427,151 @@ void Renderer::CalculateMatrix(Transform t)
 	m_WorldMatrix = DirectX::XMMatrixMultiply(m_WorldMatrix, translation);
 	m_WorldMatrix = DirectX::XMMatrixTranspose(m_WorldMatrix);
 }
+
+
+std::vector<Vertex> Renderer::m_Sphere{
+	{1.000000f, 0.000000f, 0.000000f},
+	{0.965926f, 0.000000f, -0.258819f},
+	{0.965926f, 0.000000f, -0.258819f},
+	{0.866025f, 0.000000f, -0.500000f},
+	{0.866025f, 0.000000f, -0.500000f},
+	{0.707107f, 0.000000f, -0.707107f},
+	{0.707107f, 0.000000f, -0.707107f},
+	{0.500000f, 0.000000f, -0.866025f},
+	{0.500000f, 0.000000f, -0.866025f},
+	{0.258819f, 0.000000f, -0.965926f},
+	{0.258819f, 0.000000f, -0.965926f},
+	{0.000000f, 0.000000f, -1.000000f},
+	{0.000000f, 0.000000f, -1.000000f},
+	{-0.258819f, 0.000000f, -0.965926f},
+	{-0.258819f, 0.000000f, -0.965926f},
+	{-0.500000f, 0.000000f, -0.866025f},
+	{-0.500000f, 0.000000f, -0.866025f},
+	{-0.707107f, 0.000000f, -0.707107f},
+	{-0.707107f, 0.000000f, -0.707107f},
+	{-0.866025f, 0.000000f, -0.500000f},
+	{-0.866025f, 0.000000f, -0.500000f},
+	{-0.965926f, 0.000000f, -0.258819f},
+	{-0.965926f, 0.000000f, -0.258819f},
+	{-1.000000f, 0.000000f, 0.000000f},
+	{-1.000000f, 0.000000f, 0.000000f},
+	{-0.965926f, 0.000000f, 0.258819f},
+	{-0.965926f, 0.000000f, 0.258819f},
+	{-0.866025f, 0.000000f, 0.500000f},
+	{-0.866025f, 0.000000f, 0.500000f},
+	{-0.707107f, 0.000000f, 0.707107f},
+	{-0.707107f, 0.000000f, 0.707107f},
+	{-0.500000f, 0.000000f, 0.866025f},
+	{-0.500000f, 0.000000f, 0.866025f},
+	{-0.258819f, 0.000000f, 0.965926f},
+	{-0.258819f, 0.000000f, 0.965926f},
+	{-0.000000f, 0.000000f, 1.000000f},
+	{-0.000000f, 0.000000f, 1.000000f},
+	{0.258819f, 0.000000f, 0.965926f},
+	{0.258819f, 0.000000f, 0.965926f},
+	{0.500000f, 0.000000f, 0.866026f},
+	{0.500000f, 0.000000f, 0.866026f},
+	{0.707107f, 0.000000f, 0.707107f},
+	{0.707107f, 0.000000f, 0.707107f},
+	{0.866025f, 0.000000f, 0.500000f},
+	{0.866025f, 0.000000f, 0.500000f},
+	{0.965926f, 0.000000f, 0.258819f},
+	{0.965926f, 0.000000f, 0.258819f},
+	{1.000000f, 0.000000f, 0.000000f},
+	{0.000000f, 1.000000f, 0.000000f},
+	{-0.258819f, 0.965926f, 0.000000f},
+	{-0.258819f, 0.965926f, 0.000000f},
+	{-0.500000f, 0.866025f, 0.000000f},
+	{-0.500000f, 0.866025f, 0.000000f},
+	{-0.707107f, 0.707107f, 0.000000f},
+	{-0.707107f, 0.707107f, 0.000000f},
+	{-0.866025f, 0.500000f, 0.000000f},
+	{-0.866025f, 0.500000f, 0.000000f},
+	{-0.965926f, 0.258819f, 0.000000f},
+	{-0.965926f, 0.258819f, 0.000000f},
+	{-1.000000f, 0.000000f, 0.000000f},
+	{-1.000000f, 0.000000f, 0.000000f},
+	{-0.965926f, -0.258819f, 0.000000f},
+	{-0.965926f, -0.258819f, 0.000000f},
+	{-0.866025f, -0.500000f, 0.000000f},
+	{-0.866025f, -0.500000f, 0.000000f},
+	{-0.707107f, -0.707107f, 0.000000f},
+	{-0.707107f, -0.707107f, 0.000000f},
+	{-0.500000f, -0.866025f, 0.000000f},
+	{-0.500000f, -0.866025f, 0.000000f},
+	{-0.258819f, -0.965926f, 0.000000f},
+	{-0.258819f, -0.965926f, 0.000000f},
+	{0.000000f, -1.000000f, 0.000000f},
+	{0.000000f, -1.000000f, 0.000000f},
+	{0.258819f, -0.965926f, 0.000000f},
+	{0.258819f, -0.965926f, 0.000000f},
+	{0.500000f, -0.866025f, 0.000000f},
+	{0.500000f, -0.866025f, 0.000000f},
+	{0.707107f, -0.707107f, 0.000000f},
+	{0.707107f, -0.707107f, 0.000000f},
+	{0.866025f, -0.500000f, 0.000000f},
+	{0.866025f, -0.500000f, 0.000000f},
+	{0.965926f, -0.258819f, 0.000000f},
+	{0.965926f, -0.258819f, 0.000000f},
+	{1.000000f, -0.000000f, 0.000000f},
+	{1.000000f, -0.000000f, 0.000000f},
+	{0.965926f, 0.258819f, 0.000000f},
+	{0.965926f, 0.258819f, 0.000000f},
+	{0.866026f, 0.500000f, 0.000000f},
+	{0.866026f, 0.500000f, 0.000000f},
+	{0.707107f, 0.707107f, 0.000000f},
+	{0.707107f, 0.707107f, 0.000000f},
+	{0.500000f, 0.866025f, 0.000000f},
+	{0.500000f, 0.866025f, 0.000000f},
+	{0.258819f, 0.965926f, 0.000000f},
+	{0.258819f, 0.965926f, 0.000000f},
+	{0.000000f, 1.000000f, 0.000000f},
+	{0.000000f, 0.000000f, 1.000000f},
+	{0.000000f, -0.258819f, 0.965926f},
+	{0.000000f, -0.258819f, 0.965926f},
+	{0.000000f, -0.500000f, 0.866025f},
+	{0.000000f, -0.500000f, 0.866025f},
+	{0.000000f, -0.707107f, 0.707107f},
+	{0.000000f, -0.707107f, 0.707107f},
+	{0.000000f, -0.866025f, 0.500000f},
+	{0.000000f, -0.866025f, 0.500000f},
+	{0.000000f, -0.965926f, 0.258819f},
+	{0.000000f, -0.965926f, 0.258819f},
+	{0.000000f, -1.000000f, 0.000000f},
+	{0.000000f, -1.000000f, 0.000000f},
+	{0.000000f, -0.965926f, -0.258819f},
+	{0.000000f, -0.965926f, -0.258819f},
+	{0.000000f, -0.866025f, -0.500000f},
+	{0.000000f, -0.866025f, -0.500000f},
+	{0.000000f, -0.707107f, -0.707107f},
+	{0.000000f, -0.707107f, -0.707107f},
+	{0.000000f, -0.500000f, -0.866025f},
+	{0.000000f, -0.500000f, -0.866025f},
+	{0.000000f, -0.258819f, -0.965926f},
+	{0.000000f, -0.258819f, -0.965926f},
+	{0.000000f, 0.000000f, -1.000000f},
+	{0.000000f, 0.000000f, -1.000000f},
+	{0.000000f, 0.258819f, -0.965926f},
+	{0.000000f, 0.258819f, -0.965926f},
+	{0.000000f, 0.500000f, -0.866025f},
+	{0.000000f, 0.500000f, -0.866025f},
+	{0.000000f, 0.707107f, -0.707107f},
+	{0.000000f, 0.707107f, -0.707107f},
+	{0.000000f, 0.866025f, -0.500000f},
+	{0.000000f, 0.866025f, -0.500000f},
+	{0.000000f, 0.965926f, -0.258819f},
+	{0.000000f, 0.965926f, -0.258819f},
+	{0.000000f, 1.000000f, -0.000000f},
+	{0.000000f, 1.000000f, -0.000000f},
+	{0.000000f, 0.965926f, 0.258819f},
+	{0.000000f, 0.965926f, 0.258819f},
+	{0.000000f, 0.866026f, 0.500000f},
+	{0.000000f, 0.866026f, 0.500000f},
+	{0.000000f, 0.707107f, 0.707107f},
+	{0.000000f, 0.707107f, 0.707107f},
+	{0.000000f, 0.500000f, 0.866025f},
+	{0.000000f, 0.500000f, 0.866025f},
+	{0.000000f, 0.258819f, 0.965926f},
+	{0.000000f, 0.258819f, 0.965926f},
+	{0.000000f, 0.000000f, 1.000000f}
+};

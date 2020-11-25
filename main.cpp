@@ -92,7 +92,7 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 		r.DrawLine({0, -10.0f, 0}, {0, 10.0f, 0});
 		r.DrawLine({0, 0, -10.0f}, {0, 0, 10.0f});
 
-		r.DrawCircle({},1);
+		r.DrawCircle({}, 1);
 		
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{

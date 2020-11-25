@@ -48,7 +48,8 @@ private:
 
 	ID3D11Buffer* m_MatrixBuffer = nullptr;
 	ID3D11Buffer* m_VertexBuffer = nullptr;
-	
+
+	ID3D11Buffer* m_SphereVertexBuffer = nullptr;
 
 	D3D11_MAPPED_SUBRESOURCE m_MappedResource = {};
 	MatrixBufferType* m_DataPtr = nullptr;
@@ -58,5 +59,6 @@ private:
 	unsigned int m_BufferNumber = 0;
 
 	void CalculateMatrix(Transform t);
+	static std::vector<Vertex> m_Sphere;
 };
 
