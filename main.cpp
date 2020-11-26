@@ -10,9 +10,19 @@
 #include "Lib/imgui/imgui_impl_dx11.h"
 #include "Lib/imgui/imgui_impl_win32.h"
 
+
 #undef max
 #undef min
 #include <Windows.h>
+
+#include "EntityManager.h"
+
+#include <typeinfo>
+
+#include "Components/GamepadInput.h"
+#include "Components/Translation.h"
+
+MSG message;
 
 int CALLBACK
 WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_code)
@@ -44,11 +54,13 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 
 	//Model cb("baldosa_relleno.glb", r);
 	Model sphere("Assets\\sphere.obj", r);
+
+	
+	Translation tr{};
+	EntityManager::AddEntity({&tr});
+	
 	
 	Time::Init();
-
-	MSG message;
-	
 	while (true)
 	{
 		ImGui_ImplDX11_NewFrame();
