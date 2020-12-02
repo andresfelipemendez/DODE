@@ -9,11 +9,13 @@
 struct chunk
 {
 	void* begin;
-	void* end;
+	uint16_t size;
 };
 
-struct Comparer {
-	bool operator() (const std::bitset<32> &b1, const std::bitset<32> &b2) const {
+struct Comparer
+{
+	bool operator()(const std::bitset<32> &b1, const std::bitset<32> &b2) const
+	{
 		return b1.to_ulong() < b2.to_ulong();
 	}
 };
@@ -24,4 +26,7 @@ struct EntityManager
 private:
 	static std::map<std::type_index, std::bitset<32>> m_RegisteredComponents;
 	static std::map<std::bitset<32>, chunk, Comparer> m_Archetypes;
+
+	static uint8_t* const m_Mem;
+	static const unsigned int chunk_size = 1024;
 };
