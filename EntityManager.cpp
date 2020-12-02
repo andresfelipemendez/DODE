@@ -58,7 +58,7 @@ void EntityManager::AddEntity(const std::vector<Component*>& components)
 		c.size = 1;
 		for (auto && component : components)
 		{
-
+			component->Fill(c.begin);
 		}
 		/* 
 

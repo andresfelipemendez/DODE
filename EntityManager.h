@@ -6,9 +6,14 @@
 
 #include "Components/Component.h"
 
+/* 
+	I should typedef uint8_t to somethink like raw_memory or something similar, I wonder if there is a semantic way to
+	express this
+*/
+
 struct chunk
 {
-	void* begin;
+	uint8_t* begin;
 	uint16_t size;
 };
 
