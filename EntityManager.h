@@ -32,6 +32,6 @@ private:
 	static std::map<std::type_index, std::bitset<32>> m_RegisteredComponents;
 	static std::map<std::bitset<32>, chunk, Comparer> m_Archetypes;
 
-	static uint8_t* const m_Mem;
+	static uint8_t* m_Mem;
 	static const unsigned int chunk_size = 1024;
 };

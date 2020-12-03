@@ -4,7 +4,7 @@
 
 std::map<std::type_index, std::bitset<32>> EntityManager::m_RegisteredComponents;
 std::map<std::bitset<32>, chunk, Comparer> EntityManager::m_Archetypes;
-uint8_t* const EntityManager::m_Mem = (uint8_t*)malloc(1024 * 1024 * 1024);
+uint8_t* EntityManager::m_Mem = nullptr;
 const unsigned int chunk_size = 1024;
 
 /*
@@ -13,8 +13,22 @@ const unsigned int chunk_size = 1024;
  because we use a array of structures as a table I don't know upfront the size of the archetype but each component does
 
 */
+
+/*
+	 * for each element in the array I need to first order it? i think so to avoid duplicating archetypes because of different
+	 * order, then call each component "fill" memory method that receives a pointer and copy from the "potentially" stack and fill the
+	 * archetype allocated chunk, then returns a pointer that's an offset? perhaps or have another method that returns the size? i think
+	 * the second option its best
+	 *
+	 * I need to measure performance of a map vs a vector of chunks
+*/
 void EntityManager::AddEntity(const std::vector<Component*>& components)
 {
+	if (m_Mem == nullptr)
+	{ 
+		m_Mem = (uint8_t*)calloc(1,1024);
+	}
+
 	std::bitset<32> mask;
 	for (auto && component : components)
 	{
@@ -30,46 +44,24 @@ void EntityManager::AddEntity(const std::vector<Component*>& components)
 		}	
 	}
 
-	/*
-	 * for each element in the array I need to first order it? i think so to avoid duplicating archetypes because of different
-	 * order, then call each component "fill" memory method that receives a pointer and copy from the "potentially" stack and fill the
-	 * archetype allocated chunk, then returns a pointer that's an offset? perhaps or have another method that returns the size? i think
-	 * the second option its best
-	 */
-
-	/*
-	I need to test the addvantage of the map vs a vector of chunks
-	*/
-
 	if (m_Archetypes.contains(mask))
 	{
 		// get the offset base on the number of archetypes?
-		
-		auto mem = m_Archetypes.at(mask);
-		
-
+		chunk c = m_Archetypes.at(mask);
 
 	}
 	else
 	{
 		chunk c;
-
 		c.begin = m_Mem + (chunk_size * (m_Archetypes.size() - 1));
 		c.size = 1;
 		for (auto && component : components)
 		{
 			component->Fill(c.begin);
+			// c.begin += component->size() ? 
 		}
-		/* 
-
-		this needs its a vector instead of a map i think
-
-		*/
-
-		// insert pointer?
 
 		m_Archetypes.insert({mask, c});
-		// auto t = (Translation) offset;
 	}
 	return;
 }
