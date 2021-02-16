@@ -22,6 +22,7 @@
 #include "Components/GamepadInput.h"
 #include "Components/Translation.h"
 
+
 MSG message;
 
 int CALLBACK
@@ -58,7 +59,8 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 	
 	Translation tr{};
 	EntityManager::AddEntity({&tr});
-	
+
+	//InputSystem
 	
 	Time::Init();
 	while (true)
@@ -67,9 +69,12 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
+		//crude systems invocation 
 		Time::Tick();
 		Input::Update();
 		
+		// this shouldn't be here
+		// the camera should have a transform component?
 		r.CameraPosition(Input::left_thumb, Time::deltaTime);
 		r.CameraRotation(Input::right_thumb, Time::deltaTime);
 

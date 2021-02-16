@@ -22,6 +22,8 @@ const unsigned int chunk_size = 1024;
 	 *
 	 * I need to measure performance of a map vs a vector of chunks
 */
+
+
 void EntityManager::AddEntity(const std::vector<Component*>& components)
 {
 	if (m_Mem == nullptr)
@@ -46,8 +48,11 @@ void EntityManager::AddEntity(const std::vector<Component*>& components)
 
 	if (m_Archetypes.contains(mask))
 	{
-		// get the offset base on the number of archetypes?
+		
 		chunk c = m_Archetypes.at(mask);
+		c.begin = m_Mem + (chunk_size * (m_Archetypes.size() - 1));
+		uint8_t* pos = c.begin + c.size;
+		CopyComponentDataToChunk(c.begin, components);
 
 	}
 	else
@@ -55,13 +60,17 @@ void EntityManager::AddEntity(const std::vector<Component*>& components)
 		chunk c;
 		c.begin = m_Mem + (chunk_size * (m_Archetypes.size() - 1));
 		c.size = 1;
-		for (auto && component : components)
-		{
-			component->Fill(c.begin);
-			// c.begin += component->size() ? 
-		}
+		CopyComponentDataToChunk(c.begin, components);
 
 		m_Archetypes.insert({mask, c});
 	}
 	return;
+}
+
+void EntityManager::CopyComponentDataToChunk(uint8_t* chunkOffset, const std::vector<Component*>& components) {
+	for (auto&& component : components)
+	{
+		component->Fill(chunkOffset);
+		// c.begin += component->size() ? 
+	}
 }

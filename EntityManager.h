@@ -7,7 +7,7 @@
 #include "Components/Component.h"
 
 /* 
-	I should typedef uint8_t to somethink like raw_memory or something similar, I wonder if there is a semantic way to
+	I should typedef uint8_t to something like raw_memory or something similar, I wonder if there is a semantic way to
 	express this
 */
 
@@ -28,6 +28,7 @@ struct Comparer
 struct EntityManager
 {
 	static void AddEntity(const std::vector<Component*>& components);
+	static void CopyComponentDataToChunk(uint8_t* chunkOffset, const std::vector<Component*>& components);
 private:
 	static std::map<std::type_index, std::bitset<32>> m_RegisteredComponents;
 	static std::map<std::bitset<32>, chunk, Comparer> m_Archetypes;
