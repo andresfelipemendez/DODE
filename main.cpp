@@ -21,6 +21,8 @@
 
 #include "Components/GamepadInput.h"
 #include "Components/Translation.h"
+#include "Components/CameraComponent.h"
+#include "Systems/GamepadInputSystem.h"
 
 
 MSG message;
@@ -54,13 +56,19 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 	t.scale = {0.01f, 0.01f, 0.01f};
 
 	//Model cb("baldosa_relleno.glb", r);
-	Model sphere("Assets\\sphere.obj", r);
+	//Model sphere("Assets\\sphere.obj", r);
 
-	
-	Translation tr{};
-	EntityManager::AddEntity({&tr});
+	// setup
 
-	//InputSystem
+	EntityManager::AddEntity({
+		new CameraComponent(),
+		new Translation(2,2,2)
+	});
+
+	EntityManager::AddEntity({
+		new Translation (2,2,2),
+		new GamepadInput()
+	});
 	
 	Time::Init();
 	while (true)
@@ -69,9 +77,11 @@ WinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int show_c
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		//crude systems invocation 
 		Time::Tick();
+
+		//crude systems invocation 
 		Input::Update();
+		GamepadInputSystem::Update();
 		
 		// this shouldn't be here
 		// the camera should have a transform component?

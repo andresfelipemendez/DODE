@@ -72,6 +72,15 @@
     <ClCompile Include="Input.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Components\CameraComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\RenderingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\GamepadInputSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Renderer.h">
@@ -135,6 +144,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\CameraComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\RenderingSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\GamepadInputSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

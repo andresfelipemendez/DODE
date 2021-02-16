@@ -146,6 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Components\CameraComponent.cpp" />
     <ClCompile Include="Components\Component.cpp" />
     <ClCompile Include="Components\Translation.cpp" />
     <ClCompile Include="EntityManager.cpp" />
@@ -162,11 +163,14 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Systems\GamepadInputSystem.cpp" />
+    <ClCompile Include="Systems\RenderingSystem.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Types.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Components\CameraComponent.h" />
     <ClInclude Include="Components\Component.h" />
     <ClInclude Include="Components\Translation.h" />
     <ClInclude Include="EntityManager.h" />
@@ -185,6 +189,8 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="Renderer.h" />
+    <ClInclude Include="Systems\GamepadInputSystem.h" />
+    <ClInclude Include="Systems\RenderingSystem.h" />
     <ClInclude Include="Time.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Utils.h" />

@@ -23,7 +23,6 @@ const unsigned int chunk_size = 1024;
 	 * I need to measure performance of a map vs a vector of chunks
 */
 
-
 void EntityManager::AddEntity(const std::vector<Component*>& components)
 {
 	if (m_Mem == nullptr)

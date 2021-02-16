@@ -28,6 +28,10 @@ struct Comparer
 struct EntityManager
 {
 	static void AddEntity(const std::vector<Component*>& components);
+
+	
+
+
 	static void CopyComponentDataToChunk(uint8_t* chunkOffset, const std::vector<Component*>& components);
 private:
 	static std::map<std::type_index, std::bitset<32>> m_RegisteredComponents;
